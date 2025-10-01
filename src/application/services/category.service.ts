@@ -1,4 +1,4 @@
-import { CreateCategoryUseCase } from '@application/use-cases/product/create-category.use-case';
+import { CreateCategoryUseCase } from '@application/use-cases/category/create-category.use-case';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -8,9 +8,8 @@ export class CategoryService {
   async create(dto: {
     name: string;
     description: string | null;
-    createBy: string;
+    createdBy: string;
   }) {
-    
     return await this.createCategoryUseCase.execute(dto);
   }
 }

@@ -1,17 +1,19 @@
-import { ICategoryRepository } from '@application/ports/category-repository.port';
+import { CategoryPort } from '@application/ports/category.port';
 import { CategoryEntity } from '@domain/entities/category.entity';
 import {
   Category,
   CategoryDocument,
 } from '@infrastructure/databases/schemas/category.schema';
 import { CategoryMapper } from '@infrastructure/mappers/category.mapper';
-import { InternalServerErrorException } from '@nestjs/common';
+import { InternalServerErrorException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-export class CategoryRepository implements ICategoryRepository {
+@Injectable()
+export class CategoryRepository implements CategoryPort {
   constructor(
-    @InjectModel(Category.name) private readonly model: Model<CategoryDocument>,
+    @InjectModel(Category.name)
+    private readonly model: Model<CategoryDocument>,
   ) {}
 
   async save(category: CategoryEntity): Promise<CategoryEntity> {

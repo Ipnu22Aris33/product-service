@@ -3,12 +3,12 @@ import { randomBytes } from 'crypto';
 export class CodeVO {
   private constructor(private readonly code: string) {}
 
-  static generate(): CodeVO {
+  static create(): CodeVO {
     const code = [...randomBytes(6)].map((b) => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[b % 36]).join('');
     return new CodeVO(code);
   }
 
-  static fromString(code: string): CodeVO {
+  static fromValue(code: string): CodeVO {
     return new CodeVO(code);
   }
 

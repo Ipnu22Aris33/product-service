@@ -5,12 +5,12 @@ export interface CategoryEntityProps {
   name: NameVO;
   description: DescriptionVO | null;
   isActive: boolean;
-  updatedAt: Date;
   createdBy: UidVO;
-  createdAt: Date;
-  updatedBy: UidVO;
-  deletedAt: Date | null;
   deletedBy: UidVO | null;
+  updatedBy: UidVO;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
 }
 
 export class CategoryEntity {

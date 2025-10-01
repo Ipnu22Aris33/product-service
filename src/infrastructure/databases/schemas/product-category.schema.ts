@@ -1,19 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-@Schema({ collection: 'categories' })
-export class Category extends Document {
+@Schema({ collection: 'product-categories' })
+export class ProductCategory extends Document {
   @Prop({ type: String, required: true, unique: true })
   uid: string;
 
-  @Prop({ type: String, required: true, unique: true })
-  name: string;
+  @Prop({ type: String, required: true })
+  productUid: string;
 
-  @Prop({ type: String, default: null })
-  description: string | null;
-
-  @Prop({ type: Boolean, default: true })
-  isActive: boolean;
+  @Prop({ type: String, required: true })
+  categoryUid: string;
 
   @Prop({ type: String })
   createdBy: string;
@@ -22,7 +19,7 @@ export class Category extends Document {
   updatedBy: string;
 
   @Prop({ type: String, default: null })
-  deletedBy: string;
+  deletedBy: string | null;
 
   @Prop({ type: Date, default: Date.now() })
   createdAt: Date;
@@ -34,5 +31,6 @@ export class Category extends Document {
   deletedAt: Date | null;
 }
 
-export type CategoryDocument = Category & Document;
-export const CategorySchema = SchemaFactory.createForClass(Category);
+export type ProductCategoryDocument = ProductCategory & Document;
+export const ProductCategorySchema =
+  SchemaFactory.createForClass(ProductCategory);

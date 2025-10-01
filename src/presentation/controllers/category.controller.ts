@@ -7,7 +7,7 @@ export class CategoryController {
 
   @Post('create')
   async create(
-    @Body() dto: { name: string; description: string; createBy: string },
+    @Body() dto: { name: string; description: string; createdBy: string },
   ) {
     return this.categoryService.create(dto);
   }

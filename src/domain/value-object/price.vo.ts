@@ -8,7 +8,7 @@ export class PriceVO {
     return new PriceVO(value);
   }
 
-  static fromNumber(price: number): PriceVO {
+  static fromValue(price: number): PriceVO {
     return new PriceVO(price);
   }
 
