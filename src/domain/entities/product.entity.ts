@@ -64,8 +64,11 @@ export class ProductEntity extends BaseEntity<ProductEntityProps> {
       (c) => !uidsToRemove.has(c.getCategoryUidValue()),
     );
     this.touch();
-    console.log('trigger')
   }
+
+  changePrice(){}
+
+  changeStock(){}
 
   getProductCategories(): ProductCategoryEntity[] {
     return [...this.productCategories];
