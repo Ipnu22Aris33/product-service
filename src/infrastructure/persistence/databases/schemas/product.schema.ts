@@ -21,6 +21,9 @@ export class Product extends Document {
   @Prop({ type: String, default: null })
   description: string | null;
 
+  @Prop({ type: Boolean })
+  isActive: boolean;
+
   @Prop({ type: Date, default: Date.now() })
   createdAt: Date;
 

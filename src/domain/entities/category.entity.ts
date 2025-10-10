@@ -1,28 +1,23 @@
-import { UidVO, NameVO, DescriptionVO } from '@domain/value-object';
+import { UidVO, NameVO, DescriptionVO } from '@domain/value-objects';
+import { BaseEntity, BaseEntityProps } from '@domain/base/base.entity';
 
-export interface CategoryEntityProps {
-  uid: UidVO;
+export interface CategoryEntityProps extends BaseEntityProps {  
   name: NameVO;
   description: DescriptionVO | null;
   isActive: boolean;
-  createdBy: UidVO;
-  deletedBy: UidVO | null;
-  updatedBy: UidVO;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
 }
 
-export class CategoryEntity {
-  private constructor(private readonly props: CategoryEntityProps) {}
+export class CategoryEntity extends BaseEntity<CategoryEntityProps> {
+  private constructor(props: CategoryEntityProps) {
+    super(props);
+  }
 
-  static fromProps(props: CategoryEntityProps): CategoryEntity {
+  static create(props: CategoryEntityProps): CategoryEntity {
     return new CategoryEntity(props);
   }
 
-  private touch(updatedBy: UidVO) {
-    this.props.updatedBy = updatedBy;
-    this.props.updatedAt = new Date();
+  static reconstruct(props: CategoryEntityProps): CategoryEntity {
+    return new CategoryEntity(props);
   }
 
   changeName(newName: NameVO, updatedBy: UidVO) {
@@ -51,49 +46,31 @@ export class CategoryEntity {
     }
   }
 
-  getUid(): string {
+  getUidValue(): string {
     return this.props.uid.getValue();
   }
-  getName(): string {
+  getNameValue(): string {
     return this.props.name.getValue();
   }
-  getDescription(): string | null {
+  getDescriptionValue(): string | null {
     return this.props.description?.getValue() || null;
   }
-  getIsActive(): boolean {
+  getIsActiveValue(): boolean {
     return this.props.isActive;
-  }
-  getCreatedAt(): Date {
-    return this.props.createdAt;
-  }
-  getCreatedBy(): string {
-    return this.props.createdBy.getValue();
-  }
-  getUpdatedAt(): Date {
-    return this.props.updatedAt;
-  }
-  getUpdatedBy(): string {
-    return this.props.updatedBy.getValue();
-  }
-  getDeletedAt(): Date | null {
-    return this.props.deletedAt;
-  }
-  getDeletedBy(): string | null {
-    return this.props.deletedBy?.getValue() || null;
   }
 
   toObject() {
     return {
-      uid: this.getUid(),
-      name: this.getName(),
-      description: this.getDescription(),
-      isActive: this.getIsActive(),
-      createdAt: this.getCreatedAt(),
-      createdBy: this.getCreatedBy(),
-      updatedAt: this.getUpdatedAt(),
-      updatedBy: this.getUpdatedBy(),
-      deletedAt: this.getDeletedAt(),
-      deletedBy: this.getDeletedBy(),
+      uid: this.getUidValue(),
+      name: this.getNameValue(),
+      description: this.getDescriptionValue(),
+      isActive: this.getIsActiveValue(),
+      createdAt: this.getCreatedAtValue(),
+      createdBy: this.getCreatedByValue(),
+      updatedAt: this.getUpdatedAtValue(),
+      updatedBy: this.getUpdatedByValue(),
+      deletedAt: this.getDeletedAtValue(),
+      deletedBy: this.getDeletedByValue(),
     };
   }
 }

@@ -5,106 +5,87 @@ import {
   PriceVO,
   StockVO,
   DescriptionVO,
-} from '@domain/value-object';
+} from '@domain/value-objects';
 import { ProductCategoryEntity } from './product-category.entity';
+import { BaseEntity, BaseEntityProps } from '@domain/base/base.entity';
 
-export interface ProductEntityProps {
-  uid: UidVO;
+export interface ProductEntityProps extends BaseEntityProps {
   code: CodeVO;
   name: NameVO;
   price: PriceVO;
   stock: StockVO;
+  isActive: boolean;
   description: DescriptionVO | null;
-  updatedAt: Date;
-  createdAt: Date;
-  deletedAt: Date | null;
 }
 
-export class ProductEntity {
-  private constructor(
-    private readonly props: ProductEntityProps,
-    private productCategories: ProductCategoryEntity[] = [],
-  ) {}
+export class ProductEntity extends BaseEntity<ProductEntityProps> {
+  private productCategories: ProductCategoryEntity[] = [];
 
-  private touch() {
-    this.props.updatedAt = new Date();
+  private constructor(
+    props: ProductEntityProps,
+    categories: ProductCategoryEntity[] = [],
+  ) {
+    super(props);
+    this.productCategories = categories;
   }
 
-  static fromProps(props: ProductEntityProps): ProductEntity {
+  static create(props: ProductEntityProps): ProductEntity {
     return new ProductEntity(props);
   }
 
+  static reconstruct(
+    props: ProductEntityProps,
+    categories: ProductCategoryEntity[] = [],
+  ): ProductEntity {
+    return new ProductEntity(props, categories);
+  }
+
   addCategory(categories: ProductCategoryEntity[]): void {
-    const existing = new Set(this.productCategories.map((c) => c.getUid()));
+    const newCats: ProductCategoryEntity[] = [];
+
     categories.forEach((c) => {
-      if (!existing.has(c.getUid())) {
-        this.productCategories.push(c);
-      }
+      const exists = this.productCategories.some((pc) => pc.equals(c));
+      if (!exists) newCats.push(c);
     });
+
+    if (newCats.length === 0) return;
+
+    this.productCategories.push(...newCats);
     this.touch();
+  }
+
+  setProductCategories(categories: ProductCategoryEntity[]): void {
+    this.productCategories = categories;
   }
 
   removeCategory(categoryUids: string[]): void {
     const uidsToRemove = new Set(categoryUids);
     this.productCategories = this.productCategories.filter(
-      (c) => !uidsToRemove.has(c.getUid()),
+      (c) => !uidsToRemove.has(c.getCategoryUidValue()),
     );
     this.touch();
+    console.log('trigger')
   }
 
-  getCategories(): ProductCategoryEntity[] {
+  getProductCategories(): ProductCategoryEntity[] {
     return [...this.productCategories];
   }
-
-  getUid(): string {
-    return this.props.uid.getValue();
-  }
-  getName(): string {
+  getNameValue(): string {
     return this.props.name.getValue();
   }
-  getCode(): string {
+  getCodeValue(): string {
     return this.props.code.getValue();
   }
-  getPrice(): number {
+  getPriceValue(): number {
     return this.props.price.getValue();
   }
-  getStock(): number {
+  getStockValue(): number {
     return this.props.stock.getValue();
   }
-  getDescription(): string | null {
+  getDescriptionValue(): string | null {
     return this.props.description?.getValue() ?? null;
   }
-  getCreatedAt(): Date {
-    return this.props.createdAt;
-  }
-  getUpdatedAt(): Date {
-    return this.props.updatedAt;
-  }
-  getDeletedAt(): Date | null {
-    return this.props.deletedAt ?? null;
-  }
-
-  toObject(): {
-    uid: string;
-    code: string;
-    name: string;
-    price: number;
-    stock: number;
-    description: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-    deletedAt: Date | null;
-  } {
-    return {
-      uid: this.getUid(),
-      code: this.getCode(),
-      name: this.getName(),
-      price: this.getPrice(),
-      stock: this.getStock(),
-      description: this.getDescription(),
-      createdAt: this.getCreatedAt(),
-      updatedAt: this.getUpdatedAt(),
-      deletedAt: this.getDeletedAt(),
-    };
+  getIsActiveValue(): boolean {
+    return this.props.isActive;
   }
 }

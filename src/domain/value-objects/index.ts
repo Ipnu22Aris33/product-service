@@ -1,0 +1,6 @@
+export * from '@domain/value-objects/uid.vo'
+export * from '@domain/value-objects/code.vo'
+export * from '@domain/value-objects/name.vo'
+export * from '@domain/value-objects/price.vo'
+export * from '@domain/value-objects/stock.vo'
+export * from '@domain/value-objects/description.vo'

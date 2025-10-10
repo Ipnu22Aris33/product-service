@@ -1,14 +1,11 @@
-import type { ProductPort } from '@application/ports/product.port';
-import { Inject, Injectable } from '@nestjs/common';
+import { ProductService } from '@application/services/product.service';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class FindAllProductUseCase {
-  constructor(
-    @Inject('ProductPort') private readonly port: ProductPort,
-  ) {}
+  constructor(private readonly productService: ProductService) {}
 
   async execute() {
-    const doc = await this.port.findAll();
-    return doc;
+    return await this.productService.findAllProduct();
   }
 }

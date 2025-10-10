@@ -1,36 +1,78 @@
-import { CreateProductUseCase } from '@application/use-cases/product/create-product.use-case';
-import { FindAllProductUseCase } from '@application/use-cases/product/find-all-product.use-case';
-import { FindProductByUidUseCase } from '@application/use-cases/product/find-product-by-uid.use-case';
-import { FindProductByUidsUseCase } from '@application/use-cases/product/find-product-by-uids.use-case';
-import { Injectable } from '@nestjs/common';
+import { AddProductCategoriesServiceDTO } from '@application/dtos/service-dtos/add-category-to-product.dto';
+import { CreateProductServiceDTO } from '@application/dtos/service-dtos/create-product.dto';
+import {
+  PRODUCT_PORT,
+  type ProductPort,
+} from '@application/ports/product.port';
+import { ProductCategoryFactory } from '@domain/factores/product-category.factory';
+import { ProductFactory } from '@domain/factores/product.factory';
+import {
+  DescriptionVO,
+  NameVO,
+  PriceVO,
+  StockVO,
+  UidVO,
+} from '@domain/value-objects';
+import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ProductService {
   constructor(
-    private readonly createProductUseCase: CreateProductUseCase,
-    private readonly findProductByUidUseCase: FindProductByUidUseCase,
-    private readonly findAllProductUseCase: FindAllProductUseCase,
-    private readonly findProductByUidsUseCase: FindProductByUidsUseCase,
+    @Inject(PRODUCT_PORT) private readonly productPort: ProductPort,
   ) {}
 
-  async create(dto: {
-    name: string;
-    price: number;
-    stock: number;
-    description: string | null;
-  }) {
-    return await this.createProductUseCase.execute(dto);
+  async createProduct(dto: CreateProductServiceDTO) {
+    const product = new ProductFactory().createNew({
+      props: {
+        name: NameVO.create(dto.name),
+        price: PriceVO.create(dto.price),
+        stock: StockVO.create(dto.stock),
+        description: DescriptionVO.create(dto.description) ?? null,
+      },
+    });
+    return await this.productPort.save(product);
   }
 
-  async findByUid(dto: { uid: string }) {
-    return await this.findProductByUidUseCase.execute({ uid: dto.uid });
+  async findProductByUid(dto: { productUid: string }) {
+    const product = await this.productPort.findByUid(dto.productUid);
+    return product ? product : null;
   }
 
-  async findAll() {
-    return await this.findAllProductUseCase.execute();
+  async findAllProduct() {
+    const products = await this.productPort.findAll();
+    return products ? products : [];
   }
 
-  async findByUids(dto: { uids: string[] }) {
-    return await this.findProductByUidsUseCase.execute({ uids: dto.uids });
+  async addProductCategories(dto: AddProductCategoriesServiceDTO) {
+    const product = await this.productPort.findByUid(dto.productUid);
+    if (!product) return null;
+
+    const categories = dto.categoryUids.map((uid) =>
+      new ProductCategoryFactory().createNew({
+        props: {
+          productUid: UidVO.fromValue(product.getUidValue()),
+          categoryUid: UidVO.fromValue(uid),
+        },
+      }),
+    );
+
+    product.addCategory(categories);
+
+    return await this.productPort.save(product);
+  }
+
+  async removeProductCategories(dto: AddProductCategoriesServiceDTO) {
+    const product = await this.productPort.findByUid(dto.productUid);
+    if (!product) return null;
+
+    if (dto.categoryUids && dto.categoryUids.length > 0) {
+      // Panggil method removeCategory pada entity product
+      product.removeCategory(dto.categoryUids);
+
+      // Simpan perubahan ke database melalui port
+      await this.productPort.save(product);
+    }
+
+    return product;
   }
 }

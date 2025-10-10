@@ -1,26 +1,33 @@
-import { ProductService } from '@application/services/product.service';
-import { CreateProductUseCase } from '@application/use-cases/product/create-product.use-case';
-import { FindAllProductUseCase } from '@application/use-cases/product/find-all-product.use-case';
-import { FindProductByUidUseCase } from '@application/use-cases/product/find-product-by-uid.use-case';
-import { FindProductByUidsUseCase } from '@application/use-cases/product/find-product-by-uids.use-case';
-import { DatabaseModule } from '@infrastructure/databases/database.module';
-import { ProductRepository } from '@infrastructure/databases/repositories/product.repository';
 import { Module } from '@nestjs/common';
+import { PRODUCT_PORT } from '@application/ports/product.port';
+import { DatabaseModule } from '@infrastructure/persistence/databases/database.module';
+import { ProductRepository } from '@infrastructure/persistence/databases/repositories/product.repository';
 import { ProductController } from '@presentation/controllers/product.controller';
+import { ProductService } from '@application/services/product.service';
+import {
+  AddProductCategoriesUseCase,
+  CreateProductUseCase,
+  FindAllProductUseCase,
+  FindProductByUidUseCase,
+} from '@application/use-cases/product';
+import { CategoryModule } from './category.module';
+import { RemoveProductCategoriesUseCase } from '@application/use-cases/product/remove-product-categories.use-case';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, CategoryModule],
   controllers: [ProductController],
   providers: [
     {
-      provide: 'ProductPort',
+      provide: PRODUCT_PORT,
       useClass: ProductRepository,
     },
     ProductService,
     CreateProductUseCase,
     FindAllProductUseCase,
+    AddProductCategoriesUseCase,
     FindProductByUidUseCase,
-    FindProductByUidsUseCase
+    RemoveProductCategoriesUseCase
   ],
+  exports: [ProductService],
 })
 export class ProductModule {}

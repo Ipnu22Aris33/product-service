@@ -4,36 +4,60 @@ export class ProductResponseMapper {
   static toCreate(product: ProductEntity) {
     return {
       ...this.base(product),
-      createdAt: product.getCreatedAt(),
+      createdAt: product.getCreatedAtValue(),
+    };
+  }
+
+  static toAddCategory(product: ProductEntity) {
+    return {
+      ...this.base(product),
+      categories: product.getProductCategories().map((cats) => {
+        return {
+          uid: cats.getUidValue(),
+          categoryUid: cats.getCategoryUidValue(),
+        };
+      }),
+      createdAt: product.getCreatedAtValue(),
+      updatedAt: product.getUpdatedAtValue(),
     };
   }
 
   static toFindByUid(product: ProductEntity) {
     return {
       ...this.base(product),
-      categories: product.getCategories().map((cats) => cats.getUid()),
-      createdAt: product.getCreatedAt(),
-      updatedAt: product.getUpdatedAt(),
+      categories: product.getProductCategories().map((cats) => {
+        return {
+          uid: cats.getUidValue(),
+          categoryUid: cats.getCategoryUidValue(),
+        };
+      }),
+      createdAt: product.getCreatedAtValue(),
+      updatedAt: product.getUpdatedAtValue(),
     };
   }
 
   static toFindAll(product: ProductEntity[]) {
     return product.map((products) => ({
       ...this.base(products),
-      categories: products.getCategories().map((cats) => cats.getUid()),
-      createdAt: products.getCreatedAt(),
-      updatedAt: products.getUpdatedAt(),
+      categories: products.getProductCategories().map((cats) => {
+        return {
+          uid: cats.getUidValue(),
+          categoryUid: cats.getCategoryUidValue(),
+        };
+      }),
+      createdAt: products.getCreatedAtValue(),
+      updatedAt: products.getUpdatedAtValue(),
     }));
   }
 
   private static base(product: ProductEntity) {
     return {
-      uid: product.getUid(),
-      code: product.getCode(),
-      name: product.getName(),
-      price: product.getPrice(),
-      stock: product.getStock(),
-      description: product.getDescription(),
+      uid: product.getUidValue(),
+      code: product.getCodeValue(),
+      name: product.getNameValue(),
+      price: product.getPriceValue(),
+      stock: product.getStockValue(),
+      description: product.getDescriptionValue(),
     };
   }
 }

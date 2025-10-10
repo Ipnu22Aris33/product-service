@@ -1,4 +1,4 @@
-import { DatabaseModule } from '@infrastructure/databases/database.module';
+import { DatabaseModule } from '@infrastructure/persistence/databases/database.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CategoryModule } from '@presentation/module/category.module';

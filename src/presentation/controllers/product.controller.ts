@@ -1,10 +1,27 @@
-import { ProductService } from '@application/services/product.service';
-import { Body, Controller, Get, Post, Param } from '@nestjs/common';
+import { FindProductByUidUseCase } from '@application/use-cases/product';
+import { AddProductCategoriesUseCase } from '@application/use-cases/product/add-product-categories.use-case';
+import { CreateProductUseCase } from '@application/use-cases/product/create-product.use-case';
+import { FindAllProductUseCase } from '@application/use-cases/product/find-all-product.use-case';
+import { RemoveProductCategoriesUseCase } from '@application/use-cases/product/remove-product-categories.use-case';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Param,
+  NotFoundException,
+} from '@nestjs/common';
 import { ProductResponseMapper } from '@presentation/mappers/product-response.mapper';
 
 @Controller('products')
 export class ProductController {
-  constructor(private readonly service: ProductService) {}
+  constructor(
+    private readonly createProduct: CreateProductUseCase,
+    private readonly findAllProduct: FindAllProductUseCase,
+    private readonly addProductCategories: AddProductCategoriesUseCase,
+    private readonly findProductByUid: FindProductByUidUseCase,
+    private readonly removeProductCategories: RemoveProductCategoriesUseCase
+  ) {}
 
   @Post('create')
   async create(
@@ -16,24 +33,49 @@ export class ProductController {
       description: string;
     },
   ) {
-    const doc = await this.service.create(dto);
+    const doc = await this.createProduct.execute(dto);
     return ProductResponseMapper.toCreate(doc);
   }
 
-  @Get(':uid')
-  async findByUid(@Param() dto: { uid: string }) {
-    const doc = await this.service.findByUid(dto);
+  @Get(':productUid')
+  async findByUid(@Param() dto: { productUid: string }) {
+    const doc = await this.findProductByUid.execute(dto);
     return ProductResponseMapper.toFindByUid(doc);
   }
 
   @Get()
   async findAll() {
-    const doc = await this.service.findAll();
+    const doc = await this.findAllProduct.execute();
     return ProductResponseMapper.toFindAll(doc);
   }
 
-  @Post('batch')
-  async findUids(@Body() dto: { uids: string[] }) {
-    return await this.service.findByUids(dto);
+  @Post(':productUid/categories/add')
+  async addCategory(
+    @Param() param: { productUid: string },
+    @Body() body: { categoryUids: string[] },
+  ) {
+    const doc = await this.addProductCategories.execute({
+      productUid: param.productUid,
+      categoryUids: body.categoryUids,
+    });
+    if (!doc) {
+      throw new NotFoundException('Product not found');
+    }
+    return ProductResponseMapper.toAddCategory(doc);
+  }
+
+  @Post(':productUid/categories/remove')
+  async removeCategory(
+    @Param() param: { productUid: string },
+    @Body() body: { categoryUids: string[] },
+  ) {
+    const doc = await this.removeProductCategories.execute({
+      productUid: param.productUid,
+      categoryUids: body.categoryUids,
+    });
+    if (!doc) {
+      throw new NotFoundException('Product not found');
+    }
+    return ProductResponseMapper.toAddCategory(doc);
   }
 }

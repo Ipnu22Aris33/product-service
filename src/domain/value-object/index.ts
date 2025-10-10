@@ -1,6 +1,0 @@
-export * from '@domain/value-object/uid.vo'
-export * from '@domain/value-object/code.vo'
-export * from '@domain/value-object/name.vo'
-export * from '@domain/value-object/price.vo'
-export * from '@domain/value-object/stock.vo'
-export * from '@domain/value-object/description.vo'

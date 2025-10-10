@@ -1,3 +1,4 @@
+import { BaseFactory } from '@domain/base/base.factory';
 import {
   ProductEntity,
   ProductEntityProps,
@@ -9,23 +10,40 @@ import {
   PriceVO,
   StockVO,
   UidVO,
-} from '@domain/value-object';
+} from '@domain/value-objects';
 
-export class ProductFactory {
-  static create(props: {
-    name: NameVO;
-    price: PriceVO;
-    stock: StockVO;
-    description: DescriptionVO | null;
-  }): ProductEntity {
-    const productProps: ProductEntityProps = {
-      ...props,
-      uid: UidVO.create(),
-      code: CodeVO.create(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      deletedAt: null,
-    };
-    return ProductEntity.fromProps(productProps);
+export interface ProductFactoryProps {
+  name: NameVO;
+  price: PriceVO;
+  stock: StockVO;
+  description: DescriptionVO | null;
+}
+
+export class ProductFactory extends BaseFactory<{
+  factoryProps: ProductFactoryProps;
+  entityProps: ProductEntityProps;
+  entity: ProductEntity;
+}> {
+  protected entityClass = ProductEntity;
+
+  protected getDefaults(): Partial<ProductEntityProps> {
+    return {
+      isActive: true,
+      code: CodeVO.create()
+    }
   }
+
+  createNew(props: { props: ProductFactoryProps; actor?: UidVO }) {
+    return this.create({
+      props: {
+        name: props.props.name,
+        price: props.props.price,
+        stock: props.props.stock,
+        description: props.props.description,
+      },
+      actor: props.actor,
+    });
+  }
+
+
 }

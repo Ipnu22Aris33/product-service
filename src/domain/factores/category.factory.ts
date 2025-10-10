@@ -2,24 +2,34 @@ import {
   CategoryEntity,
   CategoryEntityProps,
 } from '@domain/entities/category.entity';
-import { DescriptionVO, NameVO, UidVO } from '@domain/value-object';
+import { DescriptionVO, NameVO, UidVO } from '@domain/value-objects';
+import { BaseFactory } from '@domain/base/base.factory';
 
-export class CategoryFactory {
-  static create(props: {
-    name: NameVO;
-    description: DescriptionVO | null;
-    createdBy: UidVO;
-  }) {
-    const categoryProps: CategoryEntityProps = {
-      ...props,
-      uid: UidVO.create(),
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      updatedBy: props.createdBy,
-      deletedAt: null,
-      deletedBy: null,
-    };
-    return CategoryEntity.fromProps(categoryProps);
+export interface CategoryFactoryProps {
+  name: NameVO;
+  description: DescriptionVO | null;
+}
+
+export class CategoryFactory extends BaseFactory<{
+  factoryProps: CategoryFactoryProps;
+  entityProps: CategoryEntityProps;
+  entity: CategoryEntity;
+}> {
+  protected entityClass = CategoryEntity;
+
+  protected getDefaults(): Partial<CategoryEntityProps> {
+    return {
+      isActive: true
+    }
+  }
+
+  createNew(props: { props: CategoryFactoryProps; actor?: UidVO }) {
+    return this.create({
+      props: {
+        name: props.props.name,
+        description: props.props.description,
+      },
+      actor: props.actor,
+    });
   }
 }
