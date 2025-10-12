@@ -20,15 +20,6 @@ export class ProductCategoryEntity extends BaseEntity<ProductCategoryEntityProps
     return new ProductCategoryEntity(props);
   }
 
-  changeStatus(props: { newStatus: StatusVO; actor?: UidVO }) {
-    const { newStatus, actor } = props;
-    if (!this.props.status.equals(newStatus)) {
-      if (actor) this.props.productUid = actor;
-      this.props.status = newStatus;
-      this.touch(actor);
-    }
-  }
-
   activate(): void {
     if (this.props.status.getValue() !== StatusEnumType.ACTIVE) {
       this.props.status = StatusVO.create(StatusEnumType.ACTIVE);

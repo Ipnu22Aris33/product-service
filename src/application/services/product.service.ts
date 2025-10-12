@@ -56,28 +56,6 @@ export class ProductService {
     if (product.getStatusValue() === StatusEnumType.INACTIVE) {
       throw new UnprocessableEntityException('Cannot modify inactive product');
     }
-    // const existProductCategories = product.getProductCategories();
-    // for (const uid of dto.categoryUids) {
-    //   const existing = existProductCategories.find(
-    //     (c) => c.getCategoryUidValue() === uid,
-    //   );
-
-    //   if (existing) {
-    //     if (existing.getStatusValue() === StatusEnumType.INACTIVE) {
-    //       existing.activate();
-    //       product.touch()
-    //     }
-    //   } else {
-    //     const newCategory = new ProductCategoryFactory().createNew({
-    //       props: {
-    //         productUid: UidVO.fromValue(product.getUidValue()),
-    //         categoryUid: UidVO.fromValue(uid),
-    //       },
-    //     });
-
-    //     product.addCategory([newCategory]);
-    //   }
-    // }
 
     const categories = dto.categoryUids.map((uid) =>
       new ProductCategoryFactory().createNew({
