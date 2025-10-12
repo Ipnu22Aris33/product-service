@@ -1,3 +1,4 @@
+import { StatusEnumType } from '@domain/value-objects';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
@@ -12,13 +13,13 @@ export class Category extends Document {
   @Prop({ type: String, default: null })
   description: string | null;
 
-  @Prop({ type: Boolean, default: true })
-  isActive: boolean;
+  @Prop({ type: String, enum: StatusEnumType})
+  status: StatusEnumType;
 
-  @Prop({ type: String })
+  @Prop({ type: String, default:null })
   createdBy: string;
 
-  @Prop({ type: String })
+  @Prop({ type: String, default:null })
   updatedBy: string;
 
   @Prop({ type: String, default: null })

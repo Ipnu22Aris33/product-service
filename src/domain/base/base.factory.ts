@@ -54,7 +54,7 @@ export abstract class BaseFactory<
     // Create full properties for the entity
     const fullProps: T['entityProps'] = {
       ...mergedDomainProps,
-      uid: UidVO.create(),
+      uid: UidVO.generate(),
       createdAt: now,
       updatedAt: now,
       deletedAt: null,

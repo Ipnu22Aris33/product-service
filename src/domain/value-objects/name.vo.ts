@@ -1,7 +1,9 @@
-import { UnprocessableEntityException } from "@nestjs/common";
+import { BaseVO } from '@domain/base/base.vo';
 
-export class NameVO {
-  private constructor(private readonly value: string) {}
+export class NameVO extends BaseVO<string> {
+  private constructor(value: string) {
+    super(value);
+  }
 
   static create(value: string): NameVO {
     this.validate(value);
@@ -12,18 +14,10 @@ export class NameVO {
     return new NameVO(value);
   }
 
-  getValue(): string {
-    return this.value;
-  }
-
-  equals(other: NameVO): boolean {
-    return this.value === other.value;
-  }
-
   private static validate(value: string) {
     if (!value) throw new Error('Name is required');
-    if (value.trim().length === 0) throw new UnprocessableEntityException('Name invalid');
-    if (value.length > 254) throw new UnprocessableEntityException('Name is too long');
-    if (!/^[a-zA-Z\s]+$/.test(value)) throw new UnprocessableEntityException('Name invalid');
+    if (value.trim().length === 0) throw new Error('Name invalid');
+    if (value.length > 254) throw new Error('Name is too long');
+    if (!/^[a-zA-Z\s]+$/.test(value)) throw new Error('Name invalid');
   }
 }

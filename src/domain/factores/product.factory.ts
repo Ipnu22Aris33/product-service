@@ -8,6 +8,8 @@ import {
   DescriptionVO,
   NameVO,
   PriceVO,
+  StatusEnumType,
+  StatusVO,
   StockVO,
   UidVO,
 } from '@domain/value-objects';
@@ -28,9 +30,9 @@ export class ProductFactory extends BaseFactory<{
 
   protected getDefaults(): Partial<ProductEntityProps> {
     return {
-      isActive: true,
-      code: CodeVO.create()
-    }
+      status: StatusVO.create(StatusEnumType.ACTIVE),
+      code: CodeVO.generate(),
+    };
   }
 
   createNew(props: { props: ProductFactoryProps; actor?: UidVO }) {
@@ -44,6 +46,4 @@ export class ProductFactory extends BaseFactory<{
       actor: props.actor,
     });
   }
-
-
 }

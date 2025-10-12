@@ -1,5 +1,5 @@
 import { CategoryEntity } from '@domain/entities/category.entity';
-import { DescriptionVO, NameVO, UidVO } from '@domain/value-objects';
+import { DescriptionVO, NameVO, StatusVO, UidVO } from '@domain/value-objects';
 import { CategoryModel } from '@infrastructure/persistence/models/category.model';
 
 export class CategoryMapper {
@@ -8,7 +8,7 @@ export class CategoryMapper {
       uid: UidVO.fromValue(category.uid),
       name: NameVO.fromValue(category.name),
       description: DescriptionVO.fromValue(category.description),
-      isActive: category.isActive,
+      status: StatusVO.fromValue (category.status),
       createdAt: category.createdAt,
       updatedAt: category.updatedAt,
       deletedAt: category.deletedAt,
@@ -24,7 +24,7 @@ export class CategoryMapper {
       uid: category.getUidValue(),
       name: category.getNameValue(),
       description: category.getDescriptionValue(),
-      isActive: category.getIsActiveValue(),
+      status: category.getStatusValue(),
       createdAt: category.getCreatedAtValue(),
       updatedAt: category.getUpdatedAtValue(),
       deletedAt: category.getDeletedAtValue(),

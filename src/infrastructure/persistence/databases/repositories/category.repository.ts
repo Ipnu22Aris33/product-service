@@ -19,23 +19,21 @@ export class CategoryRepository implements CategoryPort {
   async save(category: CategoryEntity): Promise<CategoryEntity> {
     const persistance = CategoryMapper.toPersistence(category);
     const filter = { uid: persistance.uid };
-    const options = { new: true, upsert: true };
-    return this.model
-      .findOneAndUpdate(filter, persistance, options)
-      .then((doc) => {
-        if (doc) return CategoryMapper.fromPersistence(doc);
-        throw new InternalServerErrorException('Failed to upsert category');
-      });
+    return this.model.findOneAndUpdate(filter, persistance, {
+      new: true,
+      upsert: true,
+    });
   }
 
   async findByUid(uid: string | null): Promise<CategoryEntity | null> {
+    if (!uid) return null;
     const doc = await this.model.findOne({ uid });
     if (!doc) return null;
     return CategoryMapper.fromPersistence(doc);
   }
 
   async findAll(): Promise<CategoryEntity[]> {
-    const doc = await this.model.find()
-    return CategoryMapper.fromPersistenceArray(doc)
+    const doc = await this.model.find();
+    return CategoryMapper.fromPersistenceArray(doc);
   }
 }

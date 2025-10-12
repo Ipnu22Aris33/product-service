@@ -8,13 +8,14 @@ import {
 } from '@domain/value-objects';
 import { ProductCategoryEntity } from './product-category.entity';
 import { BaseEntity, BaseEntityProps } from '@domain/base/base.entity';
+import { StatusEnumType, StatusVO } from '@domain/value-objects/status.vo';
 
 export interface ProductEntityProps extends BaseEntityProps {
   code: CodeVO;
   name: NameVO;
   price: PriceVO;
   stock: StockVO;
-  isActive: boolean;
+  status: StatusVO;
   description: DescriptionVO | null;
 }
 
@@ -60,15 +61,20 @@ export class ProductEntity extends BaseEntity<ProductEntityProps> {
 
   removeCategory(categoryUids: string[]): void {
     const uidsToRemove = new Set(categoryUids);
-    this.productCategories = this.productCategories.filter(
-      (c) => !uidsToRemove.has(c.getCategoryUidValue()),
-    );
+    const newStatus = StatusVO.create(StatusEnumType.INACTIVE)
+
+    this.productCategories.forEach((c) => {
+      if (uidsToRemove.has(c.getCategoryUidValue())) {
+        c.changeStatus({newStatus});
+      }
+    });
+
     this.touch();
   }
 
-  changePrice(){}
+  changePrice() {}
 
-  changeStock(){}
+  changeStock() {}
 
   getProductCategories(): ProductCategoryEntity[] {
     return [...this.productCategories];
@@ -86,9 +92,9 @@ export class ProductEntity extends BaseEntity<ProductEntityProps> {
     return this.props.stock.getValue();
   }
   getDescriptionValue(): string | null {
-    return this.props.description?.getValue() ?? null;
+    return this.props.description ? this.props.description.getValue() : null;
   }
-  getIsActiveValue(): boolean {
-    return this.props.isActive;
+  getStatusValue(): StatusEnumType {
+    return this.props.status.getValue();
   }
 }

@@ -1,4 +1,4 @@
-import { UidVO } from '@domain/value-objects';
+import { StatusEnumType, StatusVO, UidVO } from '@domain/value-objects';
 import {
   ProductCategoryEntity,
   ProductCategoryEntityProps,
@@ -17,6 +17,12 @@ export class ProductCategoryFactory extends BaseFactory<{
 }> {
   protected entityClass = ProductCategoryEntity;
 
+  protected getDefaults(): Partial<ProductCategoryEntityProps> {
+    return {
+      status: StatusVO.create(StatusEnumType.ACTIVE),
+    };
+  }
+
   createNew(props: { props: ProductCategoryFactoryProps; actor?: UidVO }) {
     return this.create({
       props: {
@@ -25,9 +31,5 @@ export class ProductCategoryFactory extends BaseFactory<{
       },
       actor: props.actor,
     });
-  }
-
-  reconstruct(props: ProductCategoryEntityProps): ProductCategoryEntity {
-    return this.entityClass.create(props);
   }
 }

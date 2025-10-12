@@ -1,9 +1,10 @@
 import { BaseEntity, BaseEntityProps } from '@domain/base/base.entity';
-import { UidVO } from '@domain/value-objects';
+import { StatusEnumType, StatusVO, UidVO } from '@domain/value-objects';
 
 export interface ProductCategoryEntityProps extends BaseEntityProps {
   productUid: UidVO;
   categoryUid: UidVO;
+  status: StatusVO;
 }
 
 export class ProductCategoryEntity extends BaseEntity<ProductCategoryEntityProps> {
@@ -19,11 +20,30 @@ export class ProductCategoryEntity extends BaseEntity<ProductCategoryEntityProps
     return new ProductCategoryEntity(props);
   }
 
+  changeStatus(props: { newStatus: StatusVO; actor?: UidVO }) {
+    const { newStatus, actor } = props;
+    if (!this.props.status.equals(newStatus)) {
+      if (actor) this.props.productUid = actor;
+      this.props.status = newStatus;
+      this.touch(actor);
+    }
+  }
+
+  activate(): void {
+    if (this.props.status.getValue() !== StatusEnumType.ACTIVE) {
+      this.props.status = StatusVO.create(StatusEnumType.ACTIVE);
+      this.touch();
+    }
+  }
+
   getProductUidValue(): string {
     return this.props.productUid.getValue();
   }
   getCategoryUidValue(): string {
     return this.props.categoryUid.getValue();
+  }
+  getStatusValue(): StatusEnumType {
+    return (this, this.props.status.getValue());
   }
 
   equals(other: ProductCategoryEntity): boolean {

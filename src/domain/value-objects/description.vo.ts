@@ -1,5 +1,10 @@
-export class DescriptionVO {
-  private constructor(private readonly value: string) {}
+import { BaseVO } from '@domain/base/base.vo';
+import { UnprocessableEntityException } from '@nestjs/common';
+
+export class DescriptionVO extends BaseVO<string> {
+  private constructor(value: string) {
+    super(value);
+  }
 
   /**
    * Create a new DescriptionVO instance.
@@ -11,7 +16,8 @@ export class DescriptionVO {
 
   static create(value?: string | null): DescriptionVO | null {
     const normalized = this.normalized(value);
-    if (normalized === null) return null;
+    if (!normalized) return null;
+    this.validate(normalized);
     return new DescriptionVO(normalized);
   }
 
@@ -28,25 +34,6 @@ export class DescriptionVO {
   }
 
   /**
-   * Get the description value.
-   * @returns The description value.
-   */
-
-  getValue(): string {
-    return this.value;
-  }
-
-  /**
-   * Check if this DescriptionVO instance is equal to another.
-   * @param other The other DescriptionVO instance.
-   * @returns True if equal, false otherwise.
-   */
-
-  equals(other: DescriptionVO): boolean {
-    return this.value === other.value;
-  }
-
-  /**
    * Normalize the description value.
    * @param value The description value.
    * @returns The normalized description value or null if invalid.
@@ -56,5 +43,10 @@ export class DescriptionVO {
     if (!value) return null;
     const trimmed = value.trim();
     return trimmed === '' ? null : trimmed;
+  }
+
+  private static validate(value: string) {
+    if (value.length > 254)
+      throw new UnprocessableEntityException('Description is too long');
   }
 }

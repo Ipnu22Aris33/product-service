@@ -1,22 +1,40 @@
-export class PriceVO {
-  private constructor(private readonly price: number) {}
+import { BaseVO } from '@domain/base/base.vo';
+import { BadRequestException, UnprocessableEntityException } from '@nestjs/common';
+
+export class PriceVO extends BaseVO<number> {
+  private constructor(value: number) {
+    super(value);
+  }
 
   static create(value: number): PriceVO {
-    if (typeof value !== 'number' || isNaN(value) || value <= 0) {
-      throw new Error('Price must be a positive number greater than 0');
-    }
+    this.validate(value);
     return new PriceVO(value);
   }
 
-  static fromValue(price: number): PriceVO {
-    return new PriceVO(price);
+  static fromValue(value: number): PriceVO {
+    return new PriceVO(value);
   }
 
-  getValue(): number {
-    return this.price;
+  add(other: PriceVO): PriceVO {
+    return new PriceVO(this.value + other.value);
   }
 
-  toNumber(): number {
-    return this.price;
+  multiply(quantity: number): PriceVO {
+    if (quantity <= 0) {
+      throw new UnprocessableEntityException('Quantity must be greater than 0');
+    }
+    return new PriceVO(this.value * quantity);
+  }
+
+  private static validate(value: number): void {
+    if (value === null || value === undefined) {
+      throw new BadRequestException('Price is required');
+    }
+    if (isNaN(value) || !isFinite(value)) {
+      throw new UnprocessableEntityException('Price must be a valid number');
+    }
+    if (value <= 0) {
+      throw new UnprocessableEntityException('Price must be greater than 0');
+    }
   }
 }

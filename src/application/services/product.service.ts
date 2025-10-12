@@ -10,10 +10,16 @@ import {
   DescriptionVO,
   NameVO,
   PriceVO,
+  StatusEnumType,
+  StatusVO,
   StockVO,
   UidVO,
 } from '@domain/value-objects';
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 
 @Injectable()
 export class ProductService {
@@ -47,16 +53,33 @@ export class ProductService {
     const product = await this.productPort.findByUid(dto.productUid);
     if (!product) return null;
 
-    const categories = dto.categoryUids.map((uid) =>
-      new ProductCategoryFactory().createNew({
-        props: {
-          productUid: UidVO.fromValue(product.getUidValue()),
-          categoryUid: UidVO.fromValue(uid),
-        },
-      }),
-    );
+    if (product.getStatusValue() === StatusEnumType.INACTIVE) {
+      throw new UnprocessableEntityException('Cannot modify inactive product');
+    }
+    const existProductCategories = product.getProductCategories();
+    for (const uid of dto.categoryUids) {
+      const existing = existProductCategories.find(
+        (c) => c.getCategoryUidValue() === uid,
+      );
 
-    product.addCategory(categories);
+      if (existing) {
+        if (existing.getStatusValue() === StatusEnumType.INACTIVE) {
+          existing.changeStatus({
+            newStatus: StatusVO.create(StatusEnumType.ACTIVE),
+          });
+          product.touch()
+        }
+      } else {
+        const newCategory = new ProductCategoryFactory().createNew({
+          props: {
+            productUid: UidVO.fromValue(product.getUidValue()),
+            categoryUid: UidVO.fromValue(uid),
+          },
+        });
+
+        product.addCategory([newCategory]);
+      }
+    }
 
     return await this.productPort.save(product);
   }

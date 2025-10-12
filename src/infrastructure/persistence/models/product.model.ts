@@ -1,3 +1,5 @@
+import { StatusEnumType } from "@domain/value-objects";
+
 export class ProductModel {
   uid: string;
   code: string;
@@ -5,7 +7,7 @@ export class ProductModel {
   price: number;
   stock: number;
   description: string | null;
-  isActive: boolean;
+  status: StatusEnumType
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;

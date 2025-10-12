@@ -1,7 +1,10 @@
+import { BaseVO } from '@domain/base/base.vo';
 import { UnprocessableEntityException } from '@nestjs/common';
 
-export class StockVO {
-  private constructor(private readonly value: number) {}
+export class StockVO extends BaseVO<number> {
+  private constructor(value: number) {
+    super(value);
+  }
 
   static create(value: number): StockVO {
     this.validate(value);
@@ -12,15 +15,23 @@ export class StockVO {
     return new StockVO(value);
   }
 
-  getValue(): number {
-    return this.value;
-  }
-
-  equals(other: StockVO): boolean {
-    return this.value === other.value;
-  }
-
   private static validate(value: number): void {
-    if (value < 0) throw new UnprocessableEntityException();
+    if (value === null || value === undefined || isNaN(value)) {
+      throw new UnprocessableEntityException(
+        'Stock value must be a valid number',
+      );
+    }
+
+    if (!Number.isInteger(value)) {
+      throw new UnprocessableEntityException('Stock value must be an integer');
+    }
+
+    if (value < 0) {
+      throw new UnprocessableEntityException('Stock cannot be negative');
+    }
+
+    if (value > 1_000_000) {
+      throw new UnprocessableEntityException('Stock value is too large');
+    }
   }
 }

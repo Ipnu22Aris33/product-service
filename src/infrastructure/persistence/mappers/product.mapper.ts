@@ -4,6 +4,7 @@ import {
   DescriptionVO,
   NameVO,
   PriceVO,
+  StatusVO,
   StockVO,
   UidVO,
 } from '@domain/value-objects';
@@ -13,20 +14,18 @@ import { Category } from '../databases/schemas/category.schema';
 
 export class ProductMapper {
   static fromPersistence(product: ProductModel): ProductEntity {
-    return ProductEntity.reconstruct(
-      {
-        uid: UidVO.fromValue(product.uid),
-        code: CodeVO.fromValue(product.code),
-        name: NameVO.fromValue(product.name),
-        price: PriceVO.fromValue(product.price),
-        stock: StockVO.fromValue(product.stock),
-        description: DescriptionVO.fromValue(product.description),
-        isActive: product.isActive,
-        createdAt: product.createdAt,
-        updatedAt: product.updatedAt,
-        deletedAt: product.deletedAt,
-      },
-    );
+    return ProductEntity.reconstruct({
+      uid: UidVO.fromValue(product.uid),
+      code: CodeVO.fromValue(product.code),
+      name: NameVO.fromValue(product.name),
+      price: PriceVO.fromValue(product.price),
+      stock: StockVO.fromValue(product.stock),
+      description: DescriptionVO.fromValue(product.description),
+      status: StatusVO.fromValue(product.status),
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
+      deletedAt: product.deletedAt,
+    });
   }
 
   static fromPersistenceArray(products: ProductModel[]): ProductEntity[] {
@@ -41,7 +40,7 @@ export class ProductMapper {
       price: product.getPriceValue(),
       stock: product.getStockValue(),
       description: product.getDescriptionValue(),
-      isActive: product.getIsActiveValue(),
+      status: product.getStatusValue(),
       createdAt: product.getCreatedAtValue(),
       updatedAt: product.getUpdatedAtValue(),
       deletedAt: product.getDeletedAtValue(),

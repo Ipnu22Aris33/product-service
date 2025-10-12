@@ -1,5 +1,6 @@
 import { Schema, SchemaFactory, Prop } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { StatusEnumType } from '@domain/value-objects';
 
 @Schema({ collection: 'products' })
 export class Product extends Document {
@@ -21,8 +22,17 @@ export class Product extends Document {
   @Prop({ type: String, default: null })
   description: string | null;
 
-  @Prop({ type: Boolean })
-  isActive: boolean;
+  @Prop({ type: String, enum: StatusEnumType })
+  status: StatusEnumType;
+
+  @Prop({ type: String, default:null })
+  createdBy: string;
+
+  @Prop({ type: String, default:null })
+  updatedBy: string;
+
+  @Prop({ type: String, default: null })
+  deletedBy: string;
 
   @Prop({ type: Date, default: Date.now() })
   createdAt: Date;

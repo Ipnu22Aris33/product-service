@@ -1,5 +1,5 @@
 import { ProductCategoryEntity } from '@domain/entities/product-category.entity';
-import { UidVO } from '@domain/value-objects';
+import { StatusVO, UidVO } from '@domain/value-objects';
 import { ProductCategoryModel } from '@infrastructure/persistence/models/product-category.model';
 
 export class ProductCategoryMapper {
@@ -8,6 +8,7 @@ export class ProductCategoryMapper {
       uid: UidVO.fromValue(map.uid),
       productUid: UidVO.fromValue(map.productUid),
       categoryUid: UidVO.fromValue(map.categoryUid),
+      status: StatusVO.fromValue(map.status),
       createdAt: map.createdAt,
       updatedAt: map.updatedAt,
       deletedAt: map.deletedAt,
@@ -25,6 +26,7 @@ export class ProductCategoryMapper {
       uid: map.getUidValue(),
       productUid: map.getProductUidValue(),
       categoryUid: map.getCategoryUidValue(),
+      status: map.getStatusValue(),
       createdAt: map.getCreatedAtValue(),
       updatedAt: map.getUpdatedAtValue(),
       deletedAt: map.getDeletedAtValue(),

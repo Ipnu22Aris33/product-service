@@ -1,10 +1,16 @@
-import { UidVO, NameVO, DescriptionVO } from '@domain/value-objects';
+import {
+  UidVO,
+  NameVO,
+  DescriptionVO,
+  StatusVO,
+  StatusEnumType,
+} from '@domain/value-objects';
 import { BaseEntity, BaseEntityProps } from '@domain/base/base.entity';
 
-export interface CategoryEntityProps extends BaseEntityProps {  
+export interface CategoryEntityProps extends BaseEntityProps {
   name: NameVO;
   description: DescriptionVO | null;
-  isActive: boolean;
+  status: StatusVO;
 }
 
 export class CategoryEntity extends BaseEntity<CategoryEntityProps> {
@@ -20,29 +26,36 @@ export class CategoryEntity extends BaseEntity<CategoryEntityProps> {
     return new CategoryEntity(props);
   }
 
-  changeName(newName: NameVO, updatedBy: UidVO) {
+  changeName(props: { newName: NameVO; actor: UidVO }) {
+    const { newName, actor } = props;
     if (!this.props.name.equals(newName)) {
+      if (actor) this.props.updatedBy = actor;
       this.props.name = newName;
-      this.touch(updatedBy);
+      this.touch(actor);
     }
   }
 
-  changeIsActive(isActive: boolean, updatedBy: UidVO) {
-    if (this.props.isActive !== isActive) {
-      this.props.isActive = isActive;
-      this.touch(updatedBy);
-    }
-  }
-
-  changeDescription(newDesc: DescriptionVO | null, updatedBy: UidVO) {
+  changeDescription(props: { newDesc: DescriptionVO | null; actor: UidVO }) {
+    const { newDesc, actor } = props;
     if (
       (this.props.description === null && newDesc !== null) ||
       (this.props.description !== null &&
         newDesc !== null &&
-        !this.props.description.equals(newDesc))
+        !this.props.description.equals(newDesc)) ||
+      (this.props.description !== null && newDesc === null)
     ) {
+      if (actor) this.props.updatedBy = actor;
       this.props.description = newDesc;
-      this.touch(updatedBy);
+      this.touch(actor);
+    }
+  }
+
+  changeStatus(props: { newStatus: StatusVO; actor?: UidVO }) {
+    const { newStatus, actor } = props;
+    if (!this.props.status.equals(newStatus)) {
+      if (actor) this.props.updatedBy = actor;
+      this.props.status = newStatus;
+      this.touch(actor);
     }
   }
 
@@ -53,24 +66,9 @@ export class CategoryEntity extends BaseEntity<CategoryEntityProps> {
     return this.props.name.getValue();
   }
   getDescriptionValue(): string | null {
-    return this.props.description?.getValue() || null;
+    return this.props.description ? this.props.description.getValue() : null;
   }
-  getIsActiveValue(): boolean {
-    return this.props.isActive;
-  }
-
-  toObject() {
-    return {
-      uid: this.getUidValue(),
-      name: this.getNameValue(),
-      description: this.getDescriptionValue(),
-      isActive: this.getIsActiveValue(),
-      createdAt: this.getCreatedAtValue(),
-      createdBy: this.getCreatedByValue(),
-      updatedAt: this.getUpdatedAtValue(),
-      updatedBy: this.getUpdatedByValue(),
-      deletedAt: this.getDeletedAtValue(),
-      deletedBy: this.getDeletedByValue(),
-    };
+  getStatusValue(): StatusEnumType {
+    return this.props.status.getValue();
   }
 }

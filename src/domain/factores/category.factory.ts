@@ -2,7 +2,13 @@ import {
   CategoryEntity,
   CategoryEntityProps,
 } from '@domain/entities/category.entity';
-import { DescriptionVO, NameVO, UidVO } from '@domain/value-objects';
+import {
+  DescriptionVO,
+  NameVO,
+  StatusEnumType,
+  StatusVO,
+  UidVO,
+} from '@domain/value-objects';
 import { BaseFactory } from '@domain/base/base.factory';
 
 export interface CategoryFactoryProps {
@@ -19,8 +25,8 @@ export class CategoryFactory extends BaseFactory<{
 
   protected getDefaults(): Partial<CategoryEntityProps> {
     return {
-      isActive: true
-    }
+      status: StatusVO.create(StatusEnumType.ACTIVE),
+    };
   }
 
   createNew(props: { props: CategoryFactoryProps; actor?: UidVO }) {
