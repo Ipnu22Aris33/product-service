@@ -13,11 +13,11 @@ import { ProductCategoryEntity } from '@domain/entities/product-category.entity'
 import {
   Product,
   ProductDocument,
-} from '@infrastructure/persistence/databases/schemas/product.schema';
+} from '@infrastructure/persistence/databases/mongoose/schemas/product.schema';
 import {
   ProductCategory,
   ProductCategoryDocument,
-} from '@infrastructure/persistence/databases/schemas/product-category.schema';
+} from '@infrastructure/persistence/databases/mongoose/schemas/product-category.schema';
 
 import { ProductMapper } from '@infrastructure/persistence/mappers/product.mapper';
 import { ProductCategoryMapper } from '@infrastructure/persistence/mappers/product-category.mapper';

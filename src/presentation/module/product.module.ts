@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PRODUCT_PORT } from '@application/ports/product.port';
 import { DatabaseModule } from '@infrastructure/persistence/databases/database.module';
-import { ProductRepository } from '@infrastructure/persistence/databases/repositories/product.repository';
+import { ProductRepository } from '@infrastructure/persistence/databases/mongoose/repositories/product.repository';
 import { ProductController } from '@presentation/controllers/product.controller';
 import { ProductService } from '@application/services/product.service';
 import {

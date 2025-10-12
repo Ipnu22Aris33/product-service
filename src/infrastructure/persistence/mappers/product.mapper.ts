@@ -10,7 +10,7 @@ import {
 } from '@domain/value-objects';
 import { ProductModel } from '@infrastructure/persistence/models/product.model';
 import { ProductCategoryMapper } from './product-category.mapper';
-import { Category } from '../databases/schemas/category.schema';
+import { Category } from '../databases/mongoose/schemas/category.schema';
 
 export class ProductMapper {
   static fromPersistence(product: ProductModel): ProductEntity {

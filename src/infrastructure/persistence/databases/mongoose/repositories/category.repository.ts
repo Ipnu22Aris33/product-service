@@ -3,7 +3,7 @@ import { CategoryEntity } from '@domain/entities/category.entity';
 import {
   Category,
   CategoryDocument,
-} from '@infrastructure/persistence/databases/schemas/category.schema';
+} from '@infrastructure/persistence/databases/mongoose/schemas/category.schema';
 import { CategoryMapper } from '@infrastructure/persistence/mappers/category.mapper';
 import { InternalServerErrorException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
