@@ -42,16 +42,17 @@ export class ProductEntity extends BaseEntity<ProductEntityProps> {
   }
 
   addCategory(categories: ProductCategoryEntity[]): void {
-    const newCats: ProductCategoryEntity[] = [];
+    categories.forEach((category) => {
+      const existing = this.productCategories.find((pc) => pc.equals(category));
 
-    categories.forEach((c) => {
-      const exists = this.productCategories.some((pc) => pc.equals(c));
-      if (!exists) newCats.push(c);
+      if (existing) {
+        if (existing.getStatusValue() === StatusEnumType.INACTIVE) {
+          existing.activate();
+        }
+      } else {
+        this.productCategories.push(category);
+      }
     });
-
-    if (newCats.length === 0) return;
-
-    this.productCategories.push(...newCats);
     this.touch();
   }
 
@@ -61,11 +62,10 @@ export class ProductEntity extends BaseEntity<ProductEntityProps> {
 
   removeCategory(categoryUids: string[]): void {
     const uidsToRemove = new Set(categoryUids);
-    const newStatus = StatusVO.create(StatusEnumType.INACTIVE)
 
     this.productCategories.forEach((c) => {
       if (uidsToRemove.has(c.getCategoryUidValue())) {
-        c.changeStatus({newStatus});
+        c.deactivate();
       }
     });
 
