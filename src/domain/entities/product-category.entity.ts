@@ -36,6 +36,13 @@ export class ProductCategoryEntity extends BaseEntity<ProductCategoryEntityProps
     }
   }
 
+  deactivate(): void {
+    if (this.props.status.getValue() !== StatusEnumType.INACTIVE) {
+      this.props.status = StatusVO.create(StatusEnumType.INACTIVE);
+      this.touch();
+    }
+  }
+
   getProductUidValue(): string {
     return this.props.productUid.getValue();
   }
