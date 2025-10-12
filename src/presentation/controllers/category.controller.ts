@@ -1,6 +1,6 @@
-import { CreateCategoryUseCase } from '@application/use-cases/category/create-category.use-case';
-import { FindAllCategoryUseCase } from '@application/use-cases/category/find-all-category.use-case';
-import { FindCategoryByUseCase } from '@application/use-cases/category/find-category-by-uid.use-case';
+import { CreateCategoryUseCase } from '@application/use-cases/category-use-cases/create-category.use-case';
+import { FindAllCategoryUseCase } from '@application/use-cases/category-use-cases/find-all-category.use-case';
+import { FindCategoryByUseCase } from '@application/use-cases/category-use-cases/find-category-by-uid.use-case';
 import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 
 @Controller('category')

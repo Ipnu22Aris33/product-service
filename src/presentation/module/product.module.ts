@@ -9,9 +9,9 @@ import {
   CreateProductUseCase,
   FindAllProductUseCase,
   FindProductByUidUseCase,
-} from '@application/use-cases/product';
+} from '@application/use-cases/product-use-cases';
 import { CategoryModule } from './category.module';
-import { RemoveProductCategoriesUseCase } from '@application/use-cases/product/remove-product-categories.use-case';
+import { RemoveProductCategoriesUseCase } from '@application/use-cases/product-use-cases/remove-product-categories.use-case';
 
 @Module({
   imports: [DatabaseModule, CategoryModule],

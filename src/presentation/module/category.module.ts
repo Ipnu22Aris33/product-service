@@ -7,8 +7,8 @@ import { CategoryService } from '@application/services/category.service';
 import {
   CreateCategoryUseCase,
   FindCategoryByUseCase,
-} from '@application/use-cases/category';
-import { FindAllCategoryUseCase } from '@application/use-cases/category/find-all-category.use-case';
+} from '@application/use-cases/category-use-cases';
+import { FindAllCategoryUseCase } from '@application/use-cases/category-use-cases/find-all-category.use-case';
 
 @Module({
   imports: [DatabaseModule],

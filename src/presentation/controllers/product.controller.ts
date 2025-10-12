@@ -1,8 +1,8 @@
-import { FindProductByUidUseCase } from '@application/use-cases/product';
-import { AddProductCategoriesUseCase } from '@application/use-cases/product/add-product-categories.use-case';
-import { CreateProductUseCase } from '@application/use-cases/product/create-product.use-case';
-import { FindAllProductUseCase } from '@application/use-cases/product/find-all-product.use-case';
-import { RemoveProductCategoriesUseCase } from '@application/use-cases/product/remove-product-categories.use-case';
+import { FindProductByUidUseCase } from '@application/use-cases/product-use-cases';
+import { AddProductCategoriesUseCase } from '@application/use-cases/product-use-cases/add-product-categories.use-case';
+import { CreateProductUseCase } from '@application/use-cases/product-use-cases/create-product.use-case';
+import { FindAllProductUseCase } from '@application/use-cases/product-use-cases/find-all-product.use-case';
+import { RemoveProductCategoriesUseCase } from '@application/use-cases/product-use-cases/remove-product-categories.use-case';
 import {
   Body,
   Controller,
