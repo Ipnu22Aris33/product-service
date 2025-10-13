@@ -4,6 +4,6 @@ export const CATEGORY_PORT = Symbol('CATEGORY_PORT');
 
 export interface CategoryPort {
   save(category: CategoryEntity): Promise<CategoryEntity>;
-  findByUid(uid: string | null): Promise<CategoryEntity | null>;
+  findByUid(uid: string): Promise<CategoryEntity | null>;
   findAll(): Promise<CategoryEntity[]>;
 }

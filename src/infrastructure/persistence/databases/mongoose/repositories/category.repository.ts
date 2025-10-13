@@ -25,7 +25,7 @@ export class CategoryRepository implements CategoryPort {
     });
   }
 
-  async findByUid(uid: string | null): Promise<CategoryEntity | null> {
+  async findByUid(uid: string): Promise<CategoryEntity | null> {
     if (!uid) return null;
     const doc = await this.model.findOne({ uid });
     if (!doc) return null;

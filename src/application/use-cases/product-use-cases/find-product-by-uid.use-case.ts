@@ -1,6 +1,6 @@
 import type { ProductPort } from '@application/ports/product.port';
 import { ProductService } from '@application/services/product.service';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class FindProductByUidUseCase {
@@ -8,7 +8,8 @@ export class FindProductByUidUseCase {
 
   async execute(dto: { productUid: string }) {
     const doc = await this.productService.findProductByUid(dto);
-    if (!doc) throw new Error('Product Not Found');
+    if (!doc) throw new NotFoundException('Product Not Found');
+    console.log(doc)
     return doc;
   }
 }

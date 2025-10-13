@@ -20,7 +20,7 @@ export class ProductController {
     private readonly findAllProduct: FindAllProductUseCase,
     private readonly addProductCategories: AddProductCategoriesUseCase,
     private readonly findProductByUid: FindProductByUidUseCase,
-    private readonly removeProductCategories: RemoveProductCategoriesUseCase
+    private readonly removeProductCategories: RemoveProductCategoriesUseCase,
   ) {}
 
   @Post('create')
@@ -39,7 +39,9 @@ export class ProductController {
 
   @Get(':productUid')
   async findByUid(@Param() dto: { productUid: string }) {
-    const doc = await this.findProductByUid.execute(dto);
+    console.log('UID param:', dto.productUid);
+    const doc = await this.findProductByUid.execute({ productUid:dto.productUid });
+    console.log('Doc found:', doc);
     return ProductResponseMapper.toFindByUid(doc);
   }
 

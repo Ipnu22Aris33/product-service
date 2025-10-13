@@ -34,7 +34,7 @@ export class ProductRepository implements ProductPort {
   async save(product: ProductEntity): Promise<ProductEntity> {
     await this.saveProduct(product);
     await this.saveProductCategories(product);
-    return product; // entity sudah update dengan kategori terbaru
+    return product;
   }
 
   async findAll(): Promise<ProductEntity[]> {
@@ -42,7 +42,7 @@ export class ProductRepository implements ProductPort {
     return ProductMapper.fromPersistenceArray(doc);
   }
 
-  async findByUid(uid: string | null): Promise<ProductEntity | null> {
+  async findByUid(uid: string): Promise<ProductEntity | null> {
     if (!uid) return null;
     const doc = await this.productModel.findOne({ uid }).exec();
     if (!doc) return null;
@@ -55,7 +55,7 @@ export class ProductRepository implements ProductPort {
       .exec();
 
     const categories = ProductCategoryMapper.fromPersistenceArray(categoryDocs);
-    product.setProductCategories(categories); // touch aman
+    product.setProductCategories(categories);
 
     return product;
   }
@@ -89,13 +89,12 @@ export class ProductRepository implements ProductPort {
       })),
     );
 
-    // Ambil kembali dari DB agar entity sinkron
     const savedDocs = await this.productCategoryModel
       .find({ uid: { $in: persistenceCategories.map((c) => c.uid) } })
       .exec();
 
     const savedCategories =
       ProductCategoryMapper.fromPersistenceArray(savedDocs);
-    product.setProductCategories(savedCategories); // touch aman
+    product.setProductCategories(savedCategories);
   }
 }
