@@ -29,7 +29,6 @@ export class CategoryEntity extends BaseEntity<CategoryEntityProps> {
   changeName(props: { newName: NameVO; actor: UidVO }) {
     const { newName, actor } = props;
     if (!this.props.name.equals(newName)) {
-      if (actor) this.props.updatedBy = actor;
       this.props.name = newName;
       this.touch(actor);
     }
@@ -44,7 +43,6 @@ export class CategoryEntity extends BaseEntity<CategoryEntityProps> {
         !this.props.description.equals(newDesc)) ||
       (this.props.description !== null && newDesc === null)
     ) {
-      if (actor) this.props.updatedBy = actor;
       this.props.description = newDesc;
       this.touch(actor);
     }
@@ -53,7 +51,6 @@ export class CategoryEntity extends BaseEntity<CategoryEntityProps> {
   changeStatus(props: { newStatus: StatusVO; actor?: UidVO }) {
     const { newStatus, actor } = props;
     if (!this.props.status.equals(newStatus)) {
-      if (actor) this.props.updatedBy = actor;
       this.props.status = newStatus;
       this.touch(actor);
     }

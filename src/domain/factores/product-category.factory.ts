@@ -25,10 +25,7 @@ export class ProductCategoryFactory extends BaseFactory<{
 
   createNew(props: { props: ProductCategoryFactoryProps; actor?: UidVO }) {
     return this.create({
-      props: {
-        productUid: props.props.productUid,
-        categoryUid: props.props.categoryUid,
-      },
+      props: props.props,
       actor: props.actor,
     });
   }

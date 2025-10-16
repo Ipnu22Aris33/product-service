@@ -31,10 +31,7 @@ export class CategoryFactory extends BaseFactory<{
 
   createNew(props: { props: CategoryFactoryProps; actor?: UidVO }) {
     return this.create({
-      props: {
-        name: props.props.name,
-        description: props.props.description,
-      },
+      props: props.props,
       actor: props.actor,
     });
   }
