@@ -7,6 +7,7 @@ import { ProductService } from '@application/services/product.service';
 import { CategoryModule } from './category.module';
 import { ProductUseCase } from '@application/use-cases/product.use-case';
 import { ProductCategoryModule } from './product-category.module';
+import { PRODUCT_IN_PORT } from '@application/ports/in/product.in-port';
 
 @Module({
   imports: [DatabaseModule, CategoryModule, ProductCategoryModule],
@@ -15,6 +16,10 @@ import { ProductCategoryModule } from './product-category.module';
     {
       provide: PRODUCT_PORT,
       useClass: ProductRepository,
+    },
+    {
+      provide: PRODUCT_IN_PORT,
+      useClass: ProductUseCase
     },
     ProductService,
     ProductUseCase

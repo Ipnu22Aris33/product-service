@@ -1,8 +1,11 @@
 import { ParamUidDTO } from '@application/dtos/param-dtos/param-uid.dto';
+import { AddProductCategoriesDTO } from '@application/dtos/use-case-dtos/add-product-categories.dto';
 import { CreateProductUseCaseDTO } from '@application/dtos/use-case-dtos/create-product.dto';
+import { ProductInPort } from '@application/ports/in/product.in-port';
 import { CategoryService } from '@application/services/category.service';
 import { ProductCategoryService } from '@application/services/product-category.service';
 import { ProductService } from '@application/services/product.service';
+import { CategoryEntity } from '@domain/entities/category.entity';
 import { ProductCategoryEntity } from '@domain/entities/product-category.entity';
 import { ProductCategoryFactory } from '@domain/factories/product-category.factory';
 import { ProductFactory } from '@domain/factories/product.factory';
@@ -16,7 +19,7 @@ import {
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
-export class ProductUseCase {
+export class ProductUseCase implements ProductInPort {
   constructor(
     private readonly productService: ProductService,
     private readonly categoryService: CategoryService,
@@ -43,6 +46,7 @@ export class ProductUseCase {
   }
 
   async getProductByUid(dto: ParamUidDTO) {
+    if (!dto.uid) return null;
     const product = await this.productService.findByUid(dto.uid);
     if (!product) throw new NotFoundException('Product not found');
     return product;
@@ -53,53 +57,72 @@ export class ProductUseCase {
     return products ?? [];
   }
 
-  async addProductCategory(dto: { productUid: string; categoryUid: string[] }) {
-    const [product, categories] = await Promise.all([
+  async addProductCategories(dto: AddProductCategoriesDTO) {
+    const [product, categories, existingCategories] = await Promise.all([
       this.productService.findByUid(dto.productUid),
-      this.categoryService.findManyByUid(dto.categoryUid),
+      this.categoryService.findManyByUid(dto.categoryUids),
+      this.productCategoryService.findByProductUid(dto.productUid),
     ]);
 
-    if (!product) throw new Error('Product not found');
+    if (!product) throw new NotFoundException('Product not found');
 
-    const { addedCategories, missingCategoryUids } = dto.categoryUid.reduce(
-      (acc, uid) => {
-        const category = categories.find((c) => c?.getUidValue() === uid);
-        if (category) {
-          acc.addedCategories.push(
-            new ProductCategoryFactory().createNew({
-              props: {
-                productUid: UidVO.create(product.getUidValue()),
-                categoryUid: UidVO.create(category.getUidValue()),
-              },
-            }),
-          );
-        } else {
-          acc.missingCategoryUids.push(uid);
-        }
-        return acc;
+    const availableCategoryUids = categories.map((c) => c.getUidValue());
+
+    // ambil UID kategori yang sudah terkait dengan produk
+    const existingProductCategoryUids = existingCategories.map((ec) =>
+      ec.getCategoryUidValue(),
+    );
+
+    // tentukan kategori yang tidak ditemukan di DB
+    const notFoundCategoryUids = dto.categoryUids.filter(
+      (uid) => !availableCategoryUids.includes(uid),
+    );
+
+    // tentukan kategori yang valid dan belum ada di produk → perlu dibuat baru
+    const newCategoryUidsToAdd = dto.categoryUids.filter(
+      (uid) =>
+        availableCategoryUids.includes(uid) &&
+        !existingProductCategoryUids.includes(uid),
+    );
+
+    const result = {
+      product,
+      added: {
+        categories: [] as ProductCategoryEntity[],
+        details: [] as CategoryEntity[],
+        count: 0,
       },
-      {
-        addedCategories: [] as ProductCategoryEntity[],
-        missingCategoryUids: [] as string[],
+      notFound: {
+        categoryUids: notFoundCategoryUids,
+        count: notFoundCategoryUids.length,
       },
-    );
+      message: '',
+    };
 
-    const existing = await this.productCategoryService.findByProductUid(
-      product.getUidValue(),
-    );
-    const toAdd = addedCategories.filter(
-      (newCat) => !existing.some((oldCat) => oldCat.equals(newCat)),
-    );
-
-    if (toAdd.length) {
-      await this.productCategoryService.bulkSave(toAdd);
-      product.touch();
+    if (newCategoryUidsToAdd.length === 0) {
+      result.message = 'No new categories to add'
+      return result;
     }
 
-    return {
-      product,
-      addedCategories,
-      missingCategoryUids,
-    };
+    result.added.categories = newCategoryUidsToAdd.map((uid) =>
+      new ProductCategoryFactory().createNew({
+        props: {
+          productUid: UidVO.create(product.getUidValue()),
+          categoryUid: UidVO.create(uid),
+        },
+      }),
+    );
+
+    result.added.details = categories.filter((c) =>
+      newCategoryUidsToAdd.includes(c.getUidValue()),
+    );
+
+    
+    await this.productCategoryService.bulkSave(result.added.categories);
+    product.touch();
+    
+    result.added.count = result.added.categories.length;
+    result.message = `Successfully added ${result.added.count} categories`
+    return result;
   }
 }

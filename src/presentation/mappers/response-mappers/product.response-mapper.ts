@@ -1,4 +1,4 @@
-import { ProductCategoryEntity } from '@domain/entities/product-category.entity';
+import { AddProductCategoriesResult } from '@application/types/product-use-case.type';
 import { ProductEntity } from '@domain/entities/product.entity';
 
 export class ProductResponseMapper {
@@ -9,31 +9,41 @@ export class ProductResponseMapper {
     };
   }
 
-  static toAddCategory(
-    product: ProductEntity,
-    addedCategories: ProductCategoryEntity[],
-    missingCategoryUids: string[] = [],
-  ) {
-    if (!product) return null;
+ static toAddCategory(result: AddProductCategoriesResult) {
+    if (!result.product) return null;
+
+    const categoryMap = new Map(
+      result.added.details.map((cat) => [cat.getUidValue(), cat])
+    );
 
     return {
+      message: result.message,
       product: {
-        ...this.base(product),
-        createdAt: product.getCreatedAtValue(),
-        updatedAt: product.getUpdatedAtValue(),
+        ...this.base(result.product),
+        createdAt: result.product.getCreatedAtValue(),
+        updatedAt: result.product.getUpdatedAtValue(),
       },
-      addedCategories: addedCategories.map((cat) => ({
-        uid: cat.getUidValue(),
-        productUid: cat.getProductUidValue(),
-        categoryUid: cat.getCategoryUidValue(),
-        status: cat.getStatusValue(),
-        createdAt: cat.getCreatedAtValue(),
-      })),
-      missingCategoryUids, // untuk audit
+      added: {
+        count: result.added.count,
+        categories: result.added.categories.map((cat) => {
+          const detail = categoryMap.get(cat.getCategoryUidValue());
+          
+          return {
+            uid: cat.getUidValue(),
+            productUid: cat.getProductUidValue(),
+            categoryUid: cat.getCategoryUidValue(),
+            status: cat.getStatusValue(),
+            createdAt: cat.getCreatedAtValue(),
+            categoryName: detail?.getNameValue(),
+          };
+        }),
+      },
+      notFound: result.notFound,
     };
   }
 
-  static toFindByUid(product: ProductEntity) {
+  static toFindByUid(product: ProductEntity | null) {
+    if (!product) return;
     return {
       ...this.base(product),
       // categories: product.getProductCategories().map((cats) => {

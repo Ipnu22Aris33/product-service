@@ -5,6 +5,8 @@ import {
 import { Body, Controller, Param, Post, Get, Inject } from '@nestjs/common';
 import { CreateCategortRequestDTO } from '@presentation/dtos/request/category/create-category.request-dto';
 import { ParamUidRequestDTO } from '@presentation/dtos/request/param/param-uid.request.dto';
+import { CategoryRequestMapper } from '@presentation/mappers/request-mappers/category.request-mapper';
+import { CategoryResponseMapper } from '@presentation/mappers/response-mappers/category.response-mapper';
 
 @Controller('category')
 export class CategoryController {
@@ -14,7 +16,9 @@ export class CategoryController {
 
   @Post('create')
   async create(@Body() body: CreateCategortRequestDTO) {
-    return this.categoryInPort.createCategory(body);
+    const req = CategoryRequestMapper.createCategory({ body });
+    const res = await this.categoryInPort.createCategory(req);
+    return CategoryResponseMapper.createCategory(res);
   }
 
   @Get(':uid')
