@@ -46,9 +46,12 @@ export class ProductCategoryEntity extends BaseEntity<ProductCategoryEntityProps
 
   equals(other: ProductCategoryEntity): boolean {
     if (!other) return false;
+
     return (
       this.getProductUidValue() === other.getProductUidValue() &&
-      this.getCategoryUidValue() === other.getCategoryUidValue()
+      this.getCategoryUidValue() === other.getCategoryUidValue() &&
+      this.getStatusValue() === other.getStatusValue() &&
+      this.getDeletedAtValue() === other.getDeletedAtValue()
     );
   }
 }

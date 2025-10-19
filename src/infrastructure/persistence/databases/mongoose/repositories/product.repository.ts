@@ -8,13 +8,7 @@ import {
   Product,
   ProductDocument,
 } from '@infrastructure/persistence/databases/mongoose/schemas/product.schema';
-import {
-  ProductCategory,
-  ProductCategoryDocument,
-} from '@infrastructure/persistence/databases/mongoose/schemas/product-category.schema';
 import { ProductMapper } from '@infrastructure/persistence/mappers/product.mapper';
-import { ProductCategoryMapper } from '@infrastructure/persistence/mappers/product-category.mapper';
-import { ProductCategoryEntity } from '@domain/entities/product-category.entity';
 
 @Injectable()
 export class ProductRepository implements ProductPort {
@@ -23,12 +17,14 @@ export class ProductRepository implements ProductPort {
     private readonly productModel: Model<ProductDocument>,
   ) {}
 
-  // --------------------------------------------------
-  // 🔹 PUBLIC METHODS (sesuai kontrak port)
-  // --------------------------------------------------
 
   async save(product: ProductEntity): Promise<void> {
-    await this.saveProduct(product);
+    const persistence = ProductMapper.toPersistence(product);
+    const filter = { uid: persistence.uid };
+    await this.productModel.findOneAndUpdate(filter, persistence, {
+      upsert: true,
+      new: true,
+    });
   }
 
   async findAll(): Promise<ProductEntity[]> {
@@ -42,29 +38,6 @@ export class ProductRepository implements ProductPort {
     const product = await this.productModel.findOne({ uid });
     if (!product) return null;
 
-    return ProductMapper.fromPersistence(product)
-  }
-
-  // --------------------------------------------------
-  // 🔸 PRIVATE HELPERS (detail implementasi)
-  // --------------------------------------------------
-
-  /** Simpan data produk utama */
-  private async saveProduct(product: ProductEntity): Promise<void> {
-    const doc = ProductMapper.toPersistence(product);
-    await this.productModel.findOneAndUpdate({ uid: doc.uid }, doc, {
-      upsert: true,
-      new: true,
-      setDefaultsOnInsert: true,
-    });
-  }
-
-  /** Simpan kategori produk (jika ada) */
-
-  /** Ambil product dari persistence */
-  private async findProduct(uid: string): Promise<ProductEntity | null> {
-    if (!uid) return null; // ✅ validasi tambahan (opsional)
-    const doc = await this.productModel.findOne({ uid }).exec();
-    return doc ? ProductMapper.fromPersistence(doc) : null;
+    return ProductMapper.fromPersistence(product);
   }
 }

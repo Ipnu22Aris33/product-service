@@ -16,13 +16,24 @@ export class ProductCategoryRepository implements ProductCategoryOutPort {
     private readonly model: Model<ProductCategoryDocument>,
   ) {}
 
-  async bulkCreate(entities: ProductCategoryEntity[]): Promise<void> {
+  async bulkSave(entities: ProductCategoryEntity[]): Promise<void> {
     if (!entities.length) return;
-    const persistance = ProductCategoryMapper.toPersistenceArray(entities);
-    await this.model.insertMany(persistance, { ordered: false });
+
+    const docs = ProductCategoryMapper.toPersistenceArray(entities);
+
+    const operations = docs.map((doc) => ({
+      updateOne: {
+        filter: {  productUid: doc.productUid, categoryUid: doc.categoryUid },
+        update: { $set: doc },
+        upsert: true,
+      },
+    }));
+
+    await this.model.bulkWrite(operations);
   }
 
   async findByProductUid(uid: string): Promise<ProductCategoryEntity[]> {
+    if (!uid) return [];
     const docs = await this.model.find({ productUid: uid }).lean();
     return ProductCategoryMapper.fromPersistenceArray(docs);
   }

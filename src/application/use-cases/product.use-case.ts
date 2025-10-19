@@ -3,6 +3,7 @@ import { CreateProductUseCaseDTO } from '@application/dtos/use-case-dtos/create-
 import { CategoryService } from '@application/services/category.service';
 import { ProductCategoryService } from '@application/services/product-category.service';
 import { ProductService } from '@application/services/product.service';
+import { ProductCategoryEntity } from '@domain/entities/product-category.entity';
 import { ProductCategoryFactory } from '@domain/factories/product-category.factory';
 import { ProductFactory } from '@domain/factories/product.factory';
 import {
@@ -59,24 +60,46 @@ export class ProductUseCase {
     ]);
 
     if (!product) throw new Error('Product not found');
-    if (!categories.length) throw new Error('No valid categories found');
 
-    const validCategories = categories.filter((c) => !!c);
-
-    const productCategoryEntities = validCategories.map((category) =>
-      new ProductCategoryFactory().createNew({
-        props: {
-          productUid: UidVO.create(product.getUidValue()),
-          categoryUid: UidVO.create(category.getUidValue()),
-        },
-      }),
+    const { addedCategories, missingCategoryUids } = dto.categoryUid.reduce(
+      (acc, uid) => {
+        const category = categories.find((c) => c?.getUidValue() === uid);
+        if (category) {
+          acc.addedCategories.push(
+            new ProductCategoryFactory().createNew({
+              props: {
+                productUid: UidVO.create(product.getUidValue()),
+                categoryUid: UidVO.create(category.getUidValue()),
+              },
+            }),
+          );
+        } else {
+          acc.missingCategoryUids.push(uid);
+        }
+        return acc;
+      },
+      {
+        addedCategories: [] as ProductCategoryEntity[],
+        missingCategoryUids: [] as string[],
+      },
     );
 
-    await this.productCategoryService.bulkCreate(productCategoryEntities);
+    const existing = await this.productCategoryService.findByProductUid(
+      product.getUidValue(),
+    );
+    const toAdd = addedCategories.filter(
+      (newCat) => !existing.some((oldCat) => oldCat.equals(newCat)),
+    );
+
+    if (toAdd.length) {
+      await this.productCategoryService.bulkSave(toAdd);
+      product.touch();
+    }
 
     return {
-      product: product.getUidValue(),
-      linkedCategories: productCategoryEntities.map((c) => c.getCategoryUidValue()),
+      product,
+      addedCategories,
+      missingCategoryUids,
     };
   }
 }

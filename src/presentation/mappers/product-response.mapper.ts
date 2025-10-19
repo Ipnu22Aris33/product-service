@@ -1,3 +1,4 @@
+import { ProductCategoryEntity } from '@domain/entities/product-category.entity';
 import { ProductEntity } from '@domain/entities/product.entity';
 
 export class ProductResponseMapper {
@@ -8,20 +9,27 @@ export class ProductResponseMapper {
     };
   }
 
-  static toAddCategory(product: ProductEntity | null) {
-    if (!product) {
-      return null;
-    }
+  static toAddCategory(
+    product: ProductEntity,
+    addedCategories: ProductCategoryEntity[],
+    missingCategoryUids: string[] = [],
+  ) {
+    if (!product) return null;
+
     return {
-      ...this.base(product),
-      // categories: product.getProductCategories().map((cats) => {
-      //   return {
-      //     uid: cats.getUidValue(),
-      //     categoryUid: cats.getCategoryUidValue(),
-      //   };
-      // }),
-      createdAt: product.getCreatedAtValue(),
-      updatedAt: product.getUpdatedAtValue(),
+      product: {
+        ...this.base(product),
+        createdAt: product.getCreatedAtValue(),
+        updatedAt: product.getUpdatedAtValue(),
+      },
+      addedCategories: addedCategories.map((cat) => ({
+        uid: cat.getUidValue(),
+        productUid: cat.getProductUidValue(),
+        categoryUid: cat.getCategoryUidValue(),
+        status: cat.getStatusValue(),
+        createdAt: cat.getCreatedAtValue(),
+      })),
+      missingCategoryUids, // untuk audit
     };
   }
 
