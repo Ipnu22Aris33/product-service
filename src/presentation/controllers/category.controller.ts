@@ -3,6 +3,8 @@ import {
   type CategoryInPort,
 } from '@application/ports/in/category.in-port';
 import { Body, Controller, Param, Post, Get, Inject } from '@nestjs/common';
+import { CreateCategortRequestDTO } from '@presentation/dtos/request/category/create-category.request-dto';
+import { ParamUidRequestDTO } from '@presentation/dtos/request/param/param-uid.request.dto';
 
 @Controller('category')
 export class CategoryController {
@@ -11,12 +13,12 @@ export class CategoryController {
   ) {}
 
   @Post('create')
-  async create(@Body() dto: { name: string; description: string }) {
-    return this.categoryInPort.createCategory(dto);
+  async create(@Body() body: CreateCategortRequestDTO) {
+    return this.categoryInPort.createCategory(body);
   }
 
   @Get(':uid')
-  async findByUid(@Param() param: { uid: string }) {
+  async findByUid(@Param() param: ParamUidRequestDTO) {
     return this.categoryInPort.getCategoryByUid({ uid: param.uid });
   }
 

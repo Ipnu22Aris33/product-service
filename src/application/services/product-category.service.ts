@@ -12,7 +12,12 @@ export class ProductCategoryService {
     private readonly productCategoryPort: ProductCategoryPort,
   ) {}
 
-  async save(entity: ProductCategoryEntity): Promise<void> {
-    await this.productCategoryPort.save(entity);
+  async bulkCreate(entities: ProductCategoryEntity[]): Promise<void> {
+    if (!entities.length) return;
+    await this.productCategoryPort.bulkCreate(entities);
+  }
+
+  async findByProductUid(productUid: string): Promise<ProductCategoryEntity[]> {
+    return await this.productCategoryPort.findByProductUid(productUid);
   }
 }

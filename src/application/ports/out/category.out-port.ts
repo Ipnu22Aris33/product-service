@@ -6,4 +6,5 @@ export interface CategoryOutPort {
   save(category: CategoryEntity): Promise<void>;
   findByUid(uid: string): Promise<CategoryEntity | null>;
   findAll(): Promise<CategoryEntity[]>;
+  findManyByUid(uids: string[]): Promise<CategoryEntity[]>;
 }

@@ -22,4 +22,9 @@ export class CategoryService {
   async findAll(): Promise<CategoryEntity[]> {
     return await this.port.findAll();
   }
+
+  async findManyByUid(uids: string[]): Promise<CategoryEntity[]> {
+    if (!uids.length) return [];
+    return await this.port.findManyByUid(uids);
+  }
 }
