@@ -1,27 +1,10 @@
-import { FindProductByUidUseCase } from '@application/use-cases/product-use-cases';
-import { AddProductCategoriesUseCase } from '@application/use-cases/product-use-cases/add-product-categories.use-case';
-import { CreateProductUseCase } from '@application/use-cases/product-use-cases/create-product.use-case';
-import { FindAllProductUseCase } from '@application/use-cases/product-use-cases/find-all-product.use-case';
-import { RemoveProductCategoriesUseCase } from '@application/use-cases/product-use-cases/remove-product-categories.use-case';
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Param,
-  NotFoundException,
-} from '@nestjs/common';
+import { ProductUseCase } from '@application/use-cases/product.use-case';
+import { Body, Controller, Get, Post, Param } from '@nestjs/common';
 import { ProductResponseMapper } from '@presentation/mappers/product-response.mapper';
 
 @Controller('products')
 export class ProductController {
-  constructor(
-    private readonly createProduct: CreateProductUseCase,
-    private readonly findAllProduct: FindAllProductUseCase,
-    private readonly addProductCategories: AddProductCategoriesUseCase,
-    private readonly findProductByUid: FindProductByUidUseCase,
-    private readonly removeProductCategories: RemoveProductCategoriesUseCase,
-  ) {}
+  constructor(private readonly productUseCase: ProductUseCase) {}
 
   @Post('create')
   async create(
@@ -33,51 +16,48 @@ export class ProductController {
       description: string;
     },
   ) {
-    const doc = await this.createProduct.execute(dto);
+    const doc = await this.productUseCase.createProduct(dto);
     return ProductResponseMapper.toCreate(doc);
   }
 
-  @Get(':productUid')
-  async findByUid(@Param() dto: { productUid: string }) {
-    console.log('UID param:', dto.productUid);
-    const doc = await this.findProductByUid.execute({ productUid:dto.productUid });
-    console.log('Doc found:', doc);
+  @Get(':uid')
+  async findByUid(@Param() param: { uid: string }) {
+    const doc = await this.productUseCase.getProductByUid({ uid: param.uid });
     return ProductResponseMapper.toFindByUid(doc);
   }
 
   @Get()
   async findAll() {
-    const doc = await this.findAllProduct.execute();
+    const doc = await this.productUseCase.getAllProducts();
     return ProductResponseMapper.toFindAll(doc);
   }
 
-  @Post(':productUid/categories/add')
-  async addCategory(
-    @Param() param: { productUid: string },
-    @Body() body: { categoryUids: string[] },
-  ) {
-    const doc = await this.addProductCategories.execute({
-      productUid: param.productUid,
-      categoryUids: body.categoryUids,
-    });
-    if (!doc) {
-      throw new NotFoundException('Product not found');
-    }
-    return ProductResponseMapper.toAddCategory(doc);
-  }
+  // @Post(':productUid/categories/add')
+  // async addCategory(
+  //   @Param() param: { productUid: string },
+  //   @Body() body: { categoryUids: string[] },
+  // ) {
+  //   console.log(param.productUid);
+  //   const doc = await this.addProductCategories.execute({
+  //     productUid: param.productUid,
+  //     categoryUids: body.categoryUids,
+  //   });
+  //   console.log(doc);
+  //   return ProductResponseMapper.toAddCategory(doc);
+  // }
 
-  @Post(':productUid/categories/remove')
-  async removeCategory(
-    @Param() param: { productUid: string },
-    @Body() body: { categoryUids: string[] },
-  ) {
-    const doc = await this.removeProductCategories.execute({
-      productUid: param.productUid,
-      categoryUids: body.categoryUids,
-    });
-    if (!doc) {
-      throw new NotFoundException('Product not found');
-    }
-    return ProductResponseMapper.toAddCategory(doc);
-  }
+  // @Post(':productUid/categories/remove')
+  // async removeCategory(
+  //   @Param() param: { productUid: string },
+  //   @Body() body: { categoryUids: string[] },
+  // ) {
+  //   const doc = await this.removeProductCategories.execute({
+  //     productUid: param.productUid,
+  //     categoryUids: body.categoryUids,
+  //   });
+  //   if (!doc) {
+  //     throw new NotFoundException('Product not found');
+  //   }
+  //   return ProductResponseMapper.toAddCategory(doc);
+  // }
 }

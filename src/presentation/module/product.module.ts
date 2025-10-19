@@ -1,17 +1,11 @@
 import { Module } from '@nestjs/common';
-import { PRODUCT_PORT } from '@application/ports/product.port';
+import { PRODUCT_PORT } from '@application/ports/out/product.out-port';
 import { DatabaseModule } from '@infrastructure/persistence/databases/database.module';
 import { ProductRepository } from '@infrastructure/persistence/databases/mongoose/repositories/product.repository';
 import { ProductController } from '@presentation/controllers/product.controller';
 import { ProductService } from '@application/services/product.service';
-import {
-  AddProductCategoriesUseCase,
-  CreateProductUseCase,
-  FindAllProductUseCase,
-  FindProductByUidUseCase,
-} from '@application/use-cases/product-use-cases';
 import { CategoryModule } from './category.module';
-import { RemoveProductCategoriesUseCase } from '@application/use-cases/product-use-cases/remove-product-categories.use-case';
+import { ProductUseCase } from '@application/use-cases/product.use-case';
 
 @Module({
   imports: [DatabaseModule, CategoryModule],
@@ -22,11 +16,7 @@ import { RemoveProductCategoriesUseCase } from '@application/use-cases/product-u
       useClass: ProductRepository,
     },
     ProductService,
-    CreateProductUseCase,
-    FindAllProductUseCase,
-    AddProductCategoriesUseCase,
-    FindProductByUidUseCase,
-    RemoveProductCategoriesUseCase
+    ProductUseCase
   ],
   exports: [ProductService],
 })

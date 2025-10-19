@@ -1,4 +1,4 @@
-import { CategoryPort } from '@application/ports/category.port';
+import { CategoryOutPort } from '@application/ports/out/category.out-port';
 import { CategoryEntity } from '@domain/entities/category.entity';
 import {
   Category,
@@ -10,16 +10,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 @Injectable()
-export class CategoryRepository implements CategoryPort {
+export class CategoryRepository implements CategoryOutPort {
   constructor(
     @InjectModel(Category.name)
     private readonly model: Model<CategoryDocument>,
   ) {}
 
-  async save(category: CategoryEntity): Promise<CategoryEntity> {
+  async save(category: CategoryEntity): Promise<void> {
     const persistance = CategoryMapper.toPersistence(category);
     const filter = { uid: persistance.uid };
-    return this.model.findOneAndUpdate(filter, persistance, {
+    await this.model.findOneAndUpdate(filter, persistance, {
       new: true,
       upsert: true,
     });

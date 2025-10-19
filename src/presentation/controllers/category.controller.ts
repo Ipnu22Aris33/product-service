@@ -1,29 +1,27 @@
-import { CreateCategoryUseCase } from '@application/use-cases/category-use-cases/create-category.use-case';
-import { FindAllCategoryUseCase } from '@application/use-cases/category-use-cases/find-all-category.use-case';
-import { FindCategoryByUseCase } from '@application/use-cases/category-use-cases/find-category-by-uid.use-case';
-import { Body, Controller, Param, Post, Get } from '@nestjs/common';
+import {
+  CATEGORY_IN_PORT,
+  type CategoryInPort,
+} from '@application/ports/in/category.in-port';
+import { Body, Controller, Param, Post, Get, Inject } from '@nestjs/common';
 
 @Controller('category')
 export class CategoryController {
   constructor(
-    private readonly createCategory: CreateCategoryUseCase,
-    private readonly findCategoryByUid: FindCategoryByUseCase,
-    private readonly findAllCategory: FindAllCategoryUseCase
+    @Inject(CATEGORY_IN_PORT) private readonly categoryInPort: CategoryInPort,
   ) {}
 
   @Post('create')
   async create(@Body() dto: { name: string; description: string }) {
-    return this.createCategory.execute(dto);
+    return this.categoryInPort.createCategory(dto);
   }
 
-  @Get(':categoryUid')
-  async findByUid(@Param() dto: { categoryUid: string }) {
-    console.log(dto)
-    return this.findCategoryByUid.execute(dto);
+  @Get(':uid')
+  async findByUid(@Param() param: { uid: string }) {
+    return this.categoryInPort.getCategoryByUid({ uid: param.uid });
   }
 
   @Get()
-  async findAll(){
-    return await this.findAllCategory.execute()
+  async findAll() {
+    return await this.categoryInPort.getAllCategories();
   }
 }

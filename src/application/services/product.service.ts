@@ -3,9 +3,10 @@ import { CreateProductServiceDTO } from '@application/dtos/service-dtos/create-p
 import {
   PRODUCT_PORT,
   type ProductPort,
-} from '@application/ports/product.port';
-import { ProductCategoryFactory } from '@domain/factores/product-category.factory';
-import { ProductFactory } from '@domain/factores/product.factory';
+} from '@application/ports/out/product.out-port';
+import { ProductEntity } from '@domain/entities/product.entity';
+import { ProductCategoryFactory } from '@domain/factories/product-category.factory';
+import { ProductFactory } from '@domain/factories/product.factory';
 import {
   DescriptionVO,
   NameVO,
@@ -27,6 +28,19 @@ export class ProductService {
     @Inject(PRODUCT_PORT) private readonly productPort: ProductPort,
   ) {}
 
+  async save(entity: ProductEntity): Promise<void> {
+    await this.productPort.save(entity);
+  }
+
+  async findByUid(entity: {
+    productUid: string;
+  }): Promise<ProductEntity | null> {
+    return await this.productPort.findByUid(entity.productUid);
+  }
+
+  async findAll(): Promise<ProductEntity[]> {
+    return await this.productPort.findAll();
+  }
   async createProduct(dto: CreateProductServiceDTO) {
     const product = new ProductFactory().createNew({
       props: {
@@ -36,7 +50,8 @@ export class ProductService {
         description: DescriptionVO.create(dto.description) ?? null,
       },
     });
-    return await this.productPort.save(product);
+    await this.productPort.save(product);
+    return product;
   }
 
   async findProductByUid(dto: { productUid: string }) {
@@ -67,7 +82,8 @@ export class ProductService {
     );
 
     product.addCategory(categories);
-    return await this.productPort.save(product);
+    await this.productPort.save(product);
+    return product;
   }
 
   async removeProductCategories(dto: AddProductCategoriesServiceDTO) {

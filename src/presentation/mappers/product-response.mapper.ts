@@ -8,7 +8,10 @@ export class ProductResponseMapper {
     };
   }
 
-  static toAddCategory(product: ProductEntity) {
+  static toAddCategory(product: ProductEntity | null) {
+    if (!product) {
+      return null;
+    }
     return {
       ...this.base(product),
       categories: product.getProductCategories().map((cats) => {

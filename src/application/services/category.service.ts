@@ -1,32 +1,25 @@
-import { CreateCategoryServiceDTO } from '@application/dtos/service-dtos/create-category.dto';
-import { CATEGORY_PORT, type CategoryPort } from '@application/ports/category.port';
-import { CategoryFactory } from '@domain/factores/category.factory';
-import { DescriptionVO, NameVO } from '@domain/value-objects';
+import {
+  CATEGORY_OUT_PORT,
+  type CategoryOutPort,
+} from '@application/ports/out/category.out-port';
+import { CategoryEntity } from '@domain/entities/category.entity';
 import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class CategoryService {
   constructor(
-    @Inject(CATEGORY_PORT) private readonly categoryPort: CategoryPort,
+    @Inject(CATEGORY_OUT_PORT) private readonly port: CategoryOutPort,
   ) {}
 
-  async createCategory(dto: CreateCategoryServiceDTO) {
-    const category = new CategoryFactory().createNew({
-      props: {
-        name: NameVO.create(dto.name),
-        description: DescriptionVO.create(dto.description) ?? null,
-      },
-    });
-    return await this.categoryPort.save(category);
+  async save(category: CategoryEntity): Promise<void> {
+    await this.port.save(category);
   }
 
-  async findCategoryByUid(dto: { categoryUid: string }) {
-    const category = await this.categoryPort.findByUid(dto.categoryUid);
-    return category ? category : null;
+  async findByUid(uid: string): Promise<CategoryEntity | null> {
+    return await this.port.findByUid(uid);
   }
 
-  async findAllCategory(){
-    const category = await this.categoryPort.findAll();
-    return category ? category : [];
+  async findAll(): Promise<CategoryEntity[]> {
+    return await this.port.findAll();
   }
 }

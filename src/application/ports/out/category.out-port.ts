@@ -1,9 +1,9 @@
 import { CategoryEntity } from '@domain/entities/category.entity';
 
-export const CATEGORY_PORT = Symbol('CATEGORY_PORT');
+export const CATEGORY_OUT_PORT = Symbol('CATEGORY_OUT_PORT');
 
-export interface CategoryPort {
-  save(category: CategoryEntity): Promise<CategoryEntity>;
+export interface CategoryOutPort {
+  save(category: CategoryEntity): Promise<void>;
   findByUid(uid: string): Promise<CategoryEntity | null>;
   findAll(): Promise<CategoryEntity[]>;
 }
