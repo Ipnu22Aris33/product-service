@@ -20,65 +20,22 @@ export interface ProductEntityProps extends BaseEntityProps {
 }
 
 export class ProductEntity extends BaseEntity<ProductEntityProps> {
-  private productCategories: ProductCategoryEntity[] = [];
-
-  private constructor(
-    props: ProductEntityProps,
-    categories: ProductCategoryEntity[] = [],
-  ) {
+  private constructor(props: ProductEntityProps) {
     super(props);
-    this.productCategories = categories;
   }
 
   static create(props: ProductEntityProps): ProductEntity {
     return new ProductEntity(props);
   }
 
-  static reconstruct(
-    props: ProductEntityProps,
-    categories: ProductCategoryEntity[] = [],
-  ): ProductEntity {
-    return new ProductEntity(props, categories);
-  }
-
-  addCategory(categories: ProductCategoryEntity[]): void {
-    categories.forEach((category) => {
-      const existing = this.productCategories.find((pc) => pc.equals(category));
-
-      if (existing) {
-        if (existing.getStatusValue() === StatusEnumType.INACTIVE) {
-          existing.activate();
-        }
-      } else {
-        this.productCategories.push(category);
-      }
-    });
-    this.touch();
-  }
-
-  setProductCategories(categories: ProductCategoryEntity[]): void {
-    this.productCategories = categories;
-  }
-
-  removeCategory(categoryUids: string[]): void {
-    const uidsToRemove = new Set(categoryUids);
-
-    this.productCategories.forEach((c) => {
-      if (uidsToRemove.has(c.getCategoryUidValue())) {
-        c.deactivate();
-      }
-    });
-
-    this.touch();
+  static reconstruct(props: ProductEntityProps): ProductEntity {
+    return new ProductEntity(props);
   }
 
   changePrice() {}
 
   changeStock() {}
 
-  getProductCategories(): ProductCategoryEntity[] {
-    return [...this.productCategories];
-  }
   getNameValue(): string {
     return this.props.name.getValue();
   }

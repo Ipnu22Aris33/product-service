@@ -14,12 +14,12 @@ export class ProductResponseMapper {
     }
     return {
       ...this.base(product),
-      categories: product.getProductCategories().map((cats) => {
-        return {
-          uid: cats.getUidValue(),
-          categoryUid: cats.getCategoryUidValue(),
-        };
-      }),
+      // categories: product.getProductCategories().map((cats) => {
+      //   return {
+      //     uid: cats.getUidValue(),
+      //     categoryUid: cats.getCategoryUidValue(),
+      //   };
+      // }),
       createdAt: product.getCreatedAtValue(),
       updatedAt: product.getUpdatedAtValue(),
     };
@@ -28,12 +28,12 @@ export class ProductResponseMapper {
   static toFindByUid(product: ProductEntity) {
     return {
       ...this.base(product),
-      categories: product.getProductCategories().map((cats) => {
-        return {
-          uid: cats.getUidValue(),
-          categoryUid: cats.getCategoryUidValue(),
-        };
-      }),
+      // categories: product.getProductCategories().map((cats) => {
+      //   return {
+      //     uid: cats.getUidValue(),
+      //     categoryUid: cats.getCategoryUidValue(),
+      //   };
+      // }),
       createdAt: product.getCreatedAtValue(),
       updatedAt: product.getUpdatedAtValue(),
     };
@@ -42,12 +42,12 @@ export class ProductResponseMapper {
   static toFindAll(product: ProductEntity[]) {
     return product.map((products) => ({
       ...this.base(products),
-      categories: products.getProductCategories().map((cats) => {
-        return {
-          uid: cats.getUidValue(),
-          categoryUid: cats.getCategoryUidValue(),
-        };
-      }),
+      // categories: products.getProductCategories().map((cats) => {
+      //   return {
+      //     uid: cats.getUidValue(),
+      //     categoryUid: cats.getCategoryUidValue(),
+      //   };
+      // }),
       createdAt: products.getCreatedAtValue(),
       updatedAt: products.getUpdatedAtValue(),
     }));

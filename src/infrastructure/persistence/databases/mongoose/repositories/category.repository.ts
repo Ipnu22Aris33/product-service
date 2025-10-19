@@ -5,7 +5,7 @@ import {
   CategoryDocument,
 } from '@infrastructure/persistence/databases/mongoose/schemas/category.schema';
 import { CategoryMapper } from '@infrastructure/persistence/mappers/category.mapper';
-import { InternalServerErrorException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -35,5 +35,10 @@ export class CategoryRepository implements CategoryOutPort {
   async findAll(): Promise<CategoryEntity[]> {
     const doc = await this.model.find();
     return CategoryMapper.fromPersistenceArray(doc);
+  }
+
+  async findManyByUid(uids: string[]): Promise<CategoryEntity[]> {
+    const docs = await this.model.find({ uid: { $in: uids } }).lean();
+    return CategoryMapper.fromPersistenceArray(docs);
   }
 }

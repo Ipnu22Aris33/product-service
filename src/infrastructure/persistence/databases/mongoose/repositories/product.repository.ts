@@ -21,8 +21,6 @@ export class ProductRepository implements ProductPort {
   constructor(
     @InjectModel(Product.name)
     private readonly productModel: Model<ProductDocument>,
-    @InjectModel(ProductCategory.name)
-    private readonly categoryModel: Model<ProductCategoryDocument>,
   ) {}
 
   // --------------------------------------------------
@@ -31,7 +29,6 @@ export class ProductRepository implements ProductPort {
 
   async save(product: ProductEntity): Promise<void> {
     await this.saveProduct(product);
-    await this.saveCategories(product);
   }
 
   async findAll(): Promise<ProductEntity[]> {
@@ -40,21 +37,12 @@ export class ProductRepository implements ProductPort {
   }
 
   async findByUid(uid: string): Promise<ProductEntity | null> {
-    // ✅ Validasi defensif
     if (!uid) return null;
 
-    // ✅ Jalankan query paralel untuk efisiensi
-    const [product, categories] = await Promise.all([
-      this.findProduct(uid),
-      this.findCategoriesByProductUid(uid),
-    ]);
-
+    const product = await this.productModel.findOne({ uid });
     if (!product) return null;
 
-    // ✅ Set relasi kategori ke aggregate root
-    product.setProductCategories(categories);
-
-    return product;
+    return ProductMapper.fromPersistence(product)
   }
 
   // --------------------------------------------------
@@ -66,53 +54,17 @@ export class ProductRepository implements ProductPort {
     const doc = ProductMapper.toPersistence(product);
     await this.productModel.findOneAndUpdate({ uid: doc.uid }, doc, {
       upsert: true,
-      new: true, // ✅ supaya mengembalikan dokumen terbaru (opsional)
+      new: true,
       setDefaultsOnInsert: true,
     });
   }
 
   /** Simpan kategori produk (jika ada) */
-  private async saveCategories(product: ProductEntity): Promise<void> {
-    const categories = product.getProductCategories();
-    if (!categories.length) return;
-
-    const productUid = product.getUidValue();
-    const docs = ProductCategoryMapper.toPersistenceArray(categories).map(
-      (doc) => ({
-        ...doc,
-        productUid,
-      }),
-    );
-
-    await Promise.all(
-      docs.map((doc) =>
-        this.categoryModel.findOneAndUpdate({ uid: doc.uid }, doc, {
-          upsert: true,
-          setDefaultsOnInsert: true,
-        }),
-      ),
-    );
-  }
 
   /** Ambil product dari persistence */
   private async findProduct(uid: string): Promise<ProductEntity | null> {
     if (!uid) return null; // ✅ validasi tambahan (opsional)
     const doc = await this.productModel.findOne({ uid }).exec();
     return doc ? ProductMapper.fromPersistence(doc) : null;
-  }
-
-  /** Ambil kategori berdasarkan UID product */
-  private async findCategoriesByProductUid(
-    uid: string,
-  ): Promise<ProductCategoryEntity[]> {
-    // ✅ Hindari query ke DB jika UID tidak valid
-    if (!uid) return [];
-
-    const docs = await this.categoryModel
-      .find({ productUid: uid })
-      .sort({ createdAt: -1 })
-      .exec();
-
-    return ProductCategoryMapper.fromPersistenceArray(docs);
   }
 }
