@@ -1,7 +1,7 @@
 import {
   PRODUCT_CATEGORY_OUT_PORT,
   type ProductCategoryOutPort,
-} from '@application/ports/out/product-category.out-port';
+} from '@application/ports/product-category.port';
 import { ProductCategoryEntity } from '@domain/entities/product-category.entity';
 import { Inject, Injectable } from '@nestjs/common';
 

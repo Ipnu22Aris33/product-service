@@ -1,12 +1,16 @@
-import { CategoryEntity } from '@domain/entities/category.entity';
+import { CreateCategoryResult } from '@application/types/category-use-case.type';
 
 export class CategoryResponseMapper {
-  static createCategory(res: CategoryEntity) {
+  static createCategory(res: CreateCategoryResult) {
     return {
-      uid: res.getUidValue(),
-      name: res.getNameValue(),
-      description: res.getDescriptionValue(),
-      createdAt: res.getCreatedAtValue(),
+      message: res.message,
+      data: {
+        uid: res.category.getUidValue(),
+        name: res.category.getNameValue(),
+        description: res.category.getDescriptionValue(),
+        createdBy: res.category.getCreatedByValue(),
+        createdAt: res.category.getCreatedAtValue(),
+      }
     };
   }
 }

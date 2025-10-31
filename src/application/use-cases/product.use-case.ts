@@ -1,7 +1,4 @@
-import { ParamUidDTO } from '@application/dtos/param-dtos/param-uid.dto';
-import { AddProductCategoriesDTO } from '@application/dtos/use-case-dtos/add-product-categories.dto';
-import { CreateProductUseCaseDTO } from '@application/dtos/use-case-dtos/create-product.dto';
-import { ProductInPort } from '@application/ports/in/product.in-port';
+import { ProductInPort } from '@application/ports/product.port';
 import { CategoryService } from '@application/services/category.service';
 import { ProductCategoryService } from '@application/services/product-category.service';
 import { ProductService } from '@application/services/product.service';
@@ -9,14 +6,13 @@ import { CategoryEntity } from '@domain/entities/category.entity';
 import { ProductCategoryEntity } from '@domain/entities/product-category.entity';
 import { ProductCategoryFactory } from '@domain/factories/product-category.factory';
 import { ProductFactory } from '@domain/factories/product.factory';
-import {
-  DescriptionVO,
-  NameVO,
-  PriceVO,
-  StockVO,
-  UidVO,
-} from '@domain/value-objects';
+import { DescriptionVO, NameVO, PriceVO, StockVO, UidVO } from '@domain/value-objects';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  CreateProductInput,
+  GetProductByUidInput,
+  AddProductCategoriesInput,
+} from '@application/types/input/product-input.type';
 
 @Injectable()
 export class ProductUseCase implements ProductInPort {
@@ -26,7 +22,7 @@ export class ProductUseCase implements ProductInPort {
     private readonly productCategoryService: ProductCategoryService,
   ) {}
 
-  async createProduct(dto: CreateProductUseCaseDTO) {
+  async createProduct(dto: CreateProductInput) {
     const nameVO = NameVO.create(dto.name);
     const priceVO = PriceVO.create(dto.price);
     const stockVO = StockVO.create(dto.stock);
@@ -42,14 +38,30 @@ export class ProductUseCase implements ProductInPort {
     });
 
     await this.productService.save(product);
-    return product;
+    return { product, message: '' };
   }
 
-  async getProductByUid(dto: ParamUidDTO) {
+  async getProductByUid(dto: GetProductByUidInput) {
     if (!dto.uid) return null;
-    const product = await this.productService.findByUid(dto.uid);
+
+    const [product, productCategories] = await Promise.all([
+      this.productService.findByUid(dto.uid),
+      this.productCategoryService.findByProductUid(dto.uid),
+    ]);
+
     if (!product) throw new NotFoundException('Product not found');
-    return product;
+
+    const categoryUids = productCategories.map((pc) => pc.getCategoryUidValue());
+    const categoryDetails = categoryUids.length > 0 ? await this.categoryService.findManyByUid(categoryUids) : [];
+
+    const result = {
+      product,
+      productCategories,
+      categoryDetails,
+      message: 'Success fetch',
+    };
+
+    return result;
   }
 
   async getAllProducts() {
@@ -57,55 +69,46 @@ export class ProductUseCase implements ProductInPort {
     return products ?? [];
   }
 
-  async addProductCategories(dto: AddProductCategoriesDTO) {
+  async addProductCategories(dto: AddProductCategoriesInput) {
+    // 1. Fetch data
     const [product, categories, existingCategories] = await Promise.all([
       this.productService.findByUid(dto.productUid),
       this.categoryService.findManyByUid(dto.categoryUids),
       this.productCategoryService.findByProductUid(dto.productUid),
     ]);
 
-    if (!product) throw new NotFoundException('Product not found');
-
-    const availableCategoryUids = categories.map((c) => c.getUidValue());
-
-    // ambil UID kategori yang sudah terkait dengan produk
-    const existingProductCategoryUids = existingCategories.map((ec) =>
-      ec.getCategoryUidValue(),
-    );
-
-    // tentukan kategori yang tidak ditemukan di DB
-    const notFoundCategoryUids = dto.categoryUids.filter(
-      (uid) => !availableCategoryUids.includes(uid),
-    );
-
-    // tentukan kategori yang valid dan belum ada di produk → perlu dibuat baru
-    const newCategoryUidsToAdd = dto.categoryUids.filter(
-      (uid) =>
-        availableCategoryUids.includes(uid) &&
-        !existingProductCategoryUids.includes(uid),
-    );
-
-    const result = {
-      product,
-      added: {
-        categories: [] as ProductCategoryEntity[],
-        details: [] as CategoryEntity[],
-        count: 0,
-      },
-      notFound: {
-        categoryUids: notFoundCategoryUids,
-        count: notFoundCategoryUids.length,
-      },
-      message: '',
-    };
-
-    if (newCategoryUidsToAdd.length === 0) {
-      result.message = 'No new categories to add'
-      return result;
+    // 2. Validation
+    if (!product) {
+      throw new NotFoundException('Product not found');
     }
 
-    result.added.categories = newCategoryUidsToAdd.map((uid) =>
-      new ProductCategoryFactory().createNew({
+    // 3. Calculate UIDs
+    const availableUids = categories.map((c) => c.getUidValue());
+    const existingUids = existingCategories.map((ec) => ec.getCategoryUidValue());
+    const notFoundUids = dto.categoryUids.filter((uid) => !availableUids.includes(uid));
+    const newUids = dto.categoryUids.filter((uid) => availableUids.includes(uid) && !existingUids.includes(uid));
+
+    // 4. Early return jika tidak ada yang baru
+    if (!newUids.length) {
+      return {
+        product,
+        added: {
+          categories: [],
+          details: [],
+          count: 0,
+        },
+        notFound: {
+          categoryUids: notFoundUids,
+          count: notFoundUids.length,
+        },
+        message: 'No new categories to add',
+      };
+    }
+
+    // 5. Create new product categories
+    const factory = new ProductCategoryFactory();
+    const newProductCategories = newUids.map((uid) =>
+      factory.createNew({
         props: {
           productUid: UidVO.create(product.getUidValue()),
           categoryUid: UidVO.create(uid),
@@ -113,16 +116,25 @@ export class ProductUseCase implements ProductInPort {
       }),
     );
 
-    result.added.details = categories.filter((c) =>
-      newCategoryUidsToAdd.includes(c.getUidValue()),
-    );
+    const newCategoryDetails = categories.filter((c) => newUids.includes(c.getUidValue()));
 
-    
-    await this.productCategoryService.bulkSave(result.added.categories);
+    // 6. Persist
+    await this.productCategoryService.bulkSave(newProductCategories);
     product.touch();
-    
-    result.added.count = result.added.categories.length;
-    result.message = `Successfully added ${result.added.count} categories`
-    return result;
+
+    // 7. Return result (declare di akhir)
+    return {
+      product,
+      added: {
+        categories: newProductCategories,
+        details: newCategoryDetails,
+        count: newProductCategories.length,
+      },
+      notFound: {
+        categoryUids: notFoundUids,
+        count: notFoundUids.length,
+      },
+      message: `Successfully added ${newProductCategories.length} categories`,
+    };
   }
 }

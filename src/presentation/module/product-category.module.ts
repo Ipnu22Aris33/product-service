@@ -1,4 +1,3 @@
-import { CATEGORY_OUT_PORT } from '@application/ports/out/category.out-port';
 import { PRODUCT_CATEGORY_OUT_PORT } from '@application/ports/out/product-category.out-port';
 import { ProductCategoryService } from '@application/services/product-category.service';
 import { DatabaseModule } from '@infrastructure/persistence/databases/database.module';

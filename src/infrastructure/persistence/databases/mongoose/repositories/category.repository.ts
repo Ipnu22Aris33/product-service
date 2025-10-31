@@ -27,9 +27,9 @@ export class CategoryRepository implements CategoryOutPort {
 
   async findByUid(uid: string): Promise<CategoryEntity | null> {
     if (!uid) return null;
+
     const doc = await this.model.findOne({ uid });
-    if (!doc) return null;
-    return CategoryMapper.fromPersistence(doc);
+    return doc && CategoryMapper.fromPersistence(doc);
   }
 
   async findAll(): Promise<CategoryEntity[]> {
@@ -38,6 +38,8 @@ export class CategoryRepository implements CategoryOutPort {
   }
 
   async findManyByUid(uids: string[]): Promise<CategoryEntity[]> {
+    if(!uids.length) return []
+
     const docs = await this.model.find({ uid: { $in: uids } }).lean();
     return CategoryMapper.fromPersistenceArray(docs);
   }

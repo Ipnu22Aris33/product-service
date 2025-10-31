@@ -7,7 +7,7 @@ import { CategoryService } from '@application/services/category.service';
 import { CategoryUseCase } from '@application/use-cases/category.use-case';
 import { CATEGORY_IN_PORT } from '@application/ports/in/category.in-port';
 
-const categoryPortProviders: Provider[] = [
+const PortProviders: Provider[] = [
   { provide: CATEGORY_IN_PORT, useClass: CategoryUseCase },
   { provide: CATEGORY_OUT_PORT, useClass: CategoryRepository },
 ];
@@ -15,7 +15,7 @@ const categoryPortProviders: Provider[] = [
 @Module({
   imports: [DatabaseModule],
   controllers: [CategoryController],
-  providers: [...categoryPortProviders, CategoryService],
+  providers: [...PortProviders, CategoryService],
   exports: [CategoryService],
 })
 export class CategoryModule {}

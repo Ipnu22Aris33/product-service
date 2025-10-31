@@ -2,8 +2,6 @@ import {
   PRODUCT_IN_PORT,
   type ProductInPort,
 } from '@application/ports/in/product.in-port';
-import { ProductUseCase } from '@application/use-cases/product.use-case';
-import { ProductMapper } from '@infrastructure/persistence/mappers/product.mapper';
 import { Body, Controller, Get, Post, Param, Inject } from '@nestjs/common';
 import { ProductRequestMapper } from '@presentation/mappers/request-mappers/product.request-mapper';
 import { ProductResponseMapper } from '@presentation/mappers/response-mappers/product.response-mapper';
@@ -45,8 +43,8 @@ export class ProductController {
     @Param() param: { uid: string },
     @Body() body: { categoryUids: string[] },
   ) {
-    const dto = ProductRequestMapper.toAddCategories({ param, body });
-    const result = await this.productInPort.addProductCategories(dto);
-    return ProductResponseMapper.toAddCategory(result);
+    const req = ProductRequestMapper.toAddCategories({ param, body });
+    const res = await this.productInPort.addProductCategories(req);
+    return ProductResponseMapper.toAddCategory(res);
   }
 }

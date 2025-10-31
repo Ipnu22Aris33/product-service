@@ -1,4 +1,4 @@
-export class AddProductCategoriesDTO{
+export class AssignCategoriesToProductInput{
     productUid:string;
     categoryUids: string[]
 }

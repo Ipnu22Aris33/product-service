@@ -1,7 +1,7 @@
 import {
   CATEGORY_OUT_PORT,
   type CategoryOutPort,
-} from '@application/ports/out/category.out-port';
+} from '@application/ports/category.port';
 import { CategoryEntity } from '@domain/entities/category.entity';
 import { Inject, Injectable } from '@nestjs/common';
 
